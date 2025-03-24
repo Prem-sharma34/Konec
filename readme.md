@@ -1,4 +1,4 @@
-## backend
+## backend(flask + firebase)
     You will need:
     1. pip install flask
     2. pip install jwt( till now)
@@ -10,6 +10,12 @@
         - real time data
         - firebase auth( enable email , google auth)
 
-## Frontend
+## Frontend(react + vite)
     You will need:
-    1.react
+    - npm install
+
+# To start
+    - cd backend/
+        - flask run
+    - cd frontend/
+        - npm run dev
