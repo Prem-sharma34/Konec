@@ -1,0 +1,22 @@
+# Ignore the virtual environment folder
+venv/
+backend/venv/
+
+# Ignore node_modules
+node_modules/
+
+# Ignore build output
+dist/
+build/
+
+# Ignore environment variables
+.env
+
+# Ignore log files
+*.log
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore Windows system files
+Thumbs.db
