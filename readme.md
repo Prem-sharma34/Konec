@@ -1,3 +1,4 @@
+# Konec
 ## backend(flask + firebase)
     You will need:
     1. pip install flask
@@ -14,7 +15,7 @@
     You will need:
     - npm install
 
-# To start
+## To start
     - cd backend/
         - flask run
     - cd frontend/
