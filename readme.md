@@ -1,76 +1,79 @@
-#Konec
+# Konec 🚀  
+### Random Chat + Social Media Web App  
 
-🚀 Random Chat + Social Media Web App
+**Konec** is a random chat and social media web application that connects users with random people, helps them make friends, and keeps them in touch through messaging. The app offers a seamless chatting experience, starting with text-based chat and expanding to audio and video calls in future updates.
 
-Konec is a random chat and social media web application that allows users to connect with random people, make friends, and stay in touch through messaging. The app is designed to provide a seamless chatting experience, starting with text-based chat and later expanding to audio and video calls.
+---
 
-##🔥 Features
+## 🔥 Features  
 
-###✅ Random Chat – Instantly connect with random users.✅ Audio Call (Planned) – Talk to new connections.✅ Video Call (Future Scope) – Face-to-face conversations.✅ Friend Requests – Add and manage friends.✅ User Profiles – Customize and showcase your profile.✅ Friend Search – Find and connect with known users.✅ Messaging – Chat with added friends.
+### ✅ Current Features  
+- **Random Chat**: Instantly connect with random users.  
+- **Friend Requests**: Add and manage friends.  
+- **User Profiles**: Customize and showcase your profile.  
+- **Friend Search**: Find and connect with known users.  
+- **Messaging**: Chat with added friends.  
 
-##🏗️ Project Structure
+### 🚧 Planned Features  
+- **Audio Call**: Talk to new connections (in development).  
+- **Video Call**: Face-to-face conversations (future scope).  
 
-###📌 Frontend (React + Vite)
+---
 
-Search Page – Find users and friends.
+## 🏗️ Project Structure  
 
-Profile Page – View and edit user profiles.
+### 📌 Frontend (React + Vite)  
+- **Search Page**: Find users and friends.  
+- **Profile Page**: View and edit user profiles.  
+- **Random Chat Page**: Chat with random people.  
+- **Messaging Page**: Stay in touch with friends.  
 
-Random Chat Page – Chat with random people.
+### 📌 Backend (Flask + Firebase)  
+- **Firebase Authentication**: Secure user login.  
+- **Realtime Database**: Store and sync data in real-time.  
+- **JWT Authentication**: Token-based authentication.  
 
-Messaging Page – Stay in touch with friends.
+---
 
-###📌 Backend (Flask + Firebase)
+## 🛠️ Tech Stack  
+- **Frontend**: React.js (with Vite)  
+- **Backend**: Flask  
+- **Database & Auth**: Firebase  
 
-Firebase Authentication
+---
 
-Realtime Database
+## ⚙️ Setup Instructions  
 
-JWT Authentication
+### Backend (Flask + Firebase)  
+#### Prerequisites  
+1. Install Flask:  
+   ```bash  
+   pip install flask
+   pip install pyjwt
+   ```
+2. Firebase
+    Create a Firebase account.
+    Set up Firebase SDK and download serviceAccountKey.json.
+    Install Firebase Admin SDK:
+   ```bash
+   pip install firebase-admin
+   ```
+    Real time data
+    Firebase auth( enable email , google auth)
+   
+4. Frontend
+   ```bash
+   cd frontend/
+   npm install
+   ```
+5. Running your app
+   (Frontend)
+   ```bash
+   npm dev run
+   ```
+   (Backend)
+   ```bash
+   flash run
+   ```
 
-###🛠️ Tech Stack
-
-Frontend: React.js (Vite)
-
-Backend: Flask
-
-Database & Auth: Firebase
-
-
-
-# Konec
-###Backend(flask + firebase)
-    You will need:
-    1. 
-    ```
-    pip install flask
-    ```
-    2. 
-    ```
-    pip install jwt
-    ```(till now)
-    
-   ###DATBASE
-   Firebase account:
-        - firebase sdk
-        - serviceAccountKey.json
-        - 
-        ```bashpip install firebase-admin```
-        - real time data
-        - firebase auth( enable email , google auth)
-
- ###Frontend(react + vite)
-    You will need:
-     ```
-     npm install
-     ```
-
- ##To start
- ###(Backend)
-    ```
-    cd backend/
-    flask run
-        ```
-###(Frontend)
-    ```cd frontend/
-        npm run dev```
+For more enquires feel free to contact our developers
