@@ -20,3 +20,6 @@ build/
 
 # Ignore Windows system files
 Thumbs.db
+
+#Ignore security key
+backend/serviceAccountKey.json
