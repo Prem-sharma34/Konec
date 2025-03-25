@@ -273,6 +273,7 @@ def google_signup():
         }), 201
 
     except Exception as e:
+        print(f"❌ Google Login Error: {str(e)}")  # ✅ Print the error in logs
         return jsonify({"error": f"Google Signup failed: {str(e)}"}), 500
 
 

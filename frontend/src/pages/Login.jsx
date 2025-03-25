@@ -3,6 +3,8 @@ import axios from "axios";
 import { auth, provider, signInWithPopup } from "../utils/firebaseConfig";
 import { useNavigate, Link } from "react-router-dom";
 
+
+
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -51,32 +53,41 @@ const Login = () => {
     }
   };
 
+
+  
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-
+      const idToken = await result.user.getIdToken(); // ✅ Get Google ID Token
+  
+      console.log("Google ID Token:", idToken); // 🔥 Debugging
+  
+      // ✅ Send token to backend
       const res = await axios.post("http://127.0.0.1:5000/api/auth/google-login", {
         idToken,
       });
-
+  
       console.log("Google Login Response:", res.data);
-
+  
       if (!res.data.token) {
         console.error("No token received from backend!");
         setMessage("Google login successful, but no token received.");
         return;
       }
-
-      localStorage.setItem("token", res.data.token); // 🔥 Store JWT Token
-      localStorage.setItem("userEmail", result.user.email); // 🔥 Store user email
+  
+      // ✅ Store user data in localStorage
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("userEmail", result.user.email);
+      localStorage.setItem("username", res.data.username);
+      localStorage.setItem("displayName", res.data.display_name);
+  
       navigate("/");
     } catch (error) {
       console.log("Google Login Error:", error.response?.data);
-      setMessage(error.response?.data?.error || "Google login failed");
+      setMessage(error.response?.data?.error || error.message || "Google login failed");
     }
   };
-
+  
   return (
     <div className="flex justify-center items-center h-screen">
       <form
