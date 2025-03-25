@@ -219,7 +219,7 @@ def send_reset_email(email, reset_link):
         mail.send(msg)
         print(f"✅ Password reset email sent to {email}")
     except Exception as e:
-        print(f"❌ Failed to send reset email: {str(e)}")
+        print(f"Failed to send reset email: {str(e)}")
 
 
 
@@ -273,7 +273,7 @@ def google_signup():
         }), 201
 
     except Exception as e:
-        print(f"❌ Google Login Error: {str(e)}")  # ✅ Print the error in logs
+        print(f"Google Login Error: {str(e)}")  # ✅ Print the error in logs
         return jsonify({"error": f"Google Signup failed: {str(e)}"}), 500
 
 
