@@ -10,7 +10,6 @@ import random
 import string
 from dotenv import load_dotenv
 from flask_mail import Message
-from flask_mail import Message
 from extension import mail
 
 # Load environment variables from .env (for local dev)
@@ -108,7 +107,7 @@ def send_verification_email(email, action_link):
             body=f"Click the link to verify your email: {action_link}"
         )
         mail.send(msg)
-        print(f"✅ Verification email sent to {email}")
+        print(f"Verification email sent to {email}")
     except Exception as e:
         print(f"Failed to send email: {str(e)}")
 
@@ -193,10 +192,10 @@ def reset_password():
         if not email:
             return jsonify({"error": "Missing email"}), 400
 
-        # ✅ Generate password reset link
+       
         reset_link = auth.generate_password_reset_link(email)
 
-        # ✅ Send email with reset link
+        
         send_reset_email(email, reset_link)
 
         return jsonify({"message": "Password reset email sent successfully."}), 200
@@ -233,7 +232,7 @@ def google_signup():
         if not id_token:
             return jsonify({"error": "Missing ID token"}), 400
 
-        # ✅ Verify Google ID token
+      
         decoded_token = auth.verify_id_token(id_token)
         email = decoded_token.get("email")
         name = decoded_token.get("name")
@@ -247,7 +246,7 @@ def google_signup():
         if user_ref:
             return jsonify({"error": "User already exists, please login"}), 400
 
-        # ✅ Generate a unique username
+       
         username = generate_unique_username(name)
 
         # ✅ Store user in Firestore
@@ -261,7 +260,7 @@ def google_signup():
         }
         firestore_db.collection("users").document(uid).set(user_data)
 
-        # ✅ Generate JWT token
+       
         token = generate_token(uid, email)
 
         return jsonify({
@@ -273,7 +272,7 @@ def google_signup():
         }), 201
 
     except Exception as e:
-        print(f"Google Login Error: {str(e)}")  # ✅ Print the error in logs
+        print(f"Google Login Error: {str(e)}")  
         return jsonify({"error": f"Google Signup failed: {str(e)}"}), 500
 
 
@@ -288,7 +287,7 @@ def google_login():
         if not id_token:
             return jsonify({"error": "Missing ID token"}), 400
 
-        # ✅ Verify Google ID token
+        # Verify Google ID token
         decoded_token = auth.verify_id_token(id_token)
         email = decoded_token.get("email")
         uid = decoded_token.get("uid")
@@ -296,7 +295,7 @@ def google_login():
         if not email:
             return jsonify({"error": "Invalid Google token"}), 400
 
-        # ✅ Check if user exists in Firestore
+        # Check if user exists in Firestore
         user_ref = firestore_db.collection("users").document(uid).get()
         if not user_ref.exists:
             return jsonify({"error": "User does not exist. Please sign up first."}), 404
@@ -305,7 +304,7 @@ def google_login():
         username = user_data.get("username", "Unknown")
         display_name = user_data.get("display_name", "Unknown")
 
-        # ✅ Generate JWT token
+       
         token = generate_token(uid, email)
 
         return jsonify({
