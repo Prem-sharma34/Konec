@@ -26,3 +26,7 @@ backend/serviceAccountKey.json
 
 
 backend/routes/__pycache__
+
+backend/utils/__pycache__
+
+backend/__pycache__

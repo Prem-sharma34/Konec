@@ -67,6 +67,8 @@ def signup() -> tuple[Dict[str, str], int]:
             "email": email,
             "display_name": display_name,
             "username": username,
+            "profilePic": "",
+            "whoami": "",
             "verified": False,
             "created_at": datetime.now(UTC).isoformat()
         }
@@ -255,6 +257,8 @@ def google_signup():
             "email": email,
             "display_name": name,
             "username": username,
+            "profilePic": "",
+            "whoami": "",
             "verified": True,  # Google users are always verified
             "created_at": datetime.now(UTC).isoformat()
         }
