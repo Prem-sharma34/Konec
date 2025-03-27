@@ -24,5 +24,5 @@ Thumbs.db
 #Ignore security key
 backend/serviceAccountKey.json
 
-backend/__pycache__
+
 backend/routes/__pycache__
