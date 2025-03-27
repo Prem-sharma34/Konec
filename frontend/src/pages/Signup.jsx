@@ -62,9 +62,8 @@ const Signup = () => {
   const handleGoogleSignup = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken(); // ✅ Get Google ID Token
-  
-      console.log("Google ID Token:", idToken); // 🔥 Debugging - Check the token
+      const idToken = await result.user.getIdToken(); 
+      console.log("Google ID Token:", idToken); 
   
       // ✅ Send ID Token to Google Signup API (FIXED)
       const res = await axios.post("http://127.0.0.1:5000/api/auth/google-signup", {
@@ -73,14 +72,13 @@ const Signup = () => {
   
       console.log("Google Signup Response:", res.data);
   
-      // ✅ Check if the backend returned a token
+     
       if (!res.data.token) {
         console.error("No token received from backend!");
         setMessage("Signup successful, but no token received.");
         return;
       }
   
-      // ✅ Store JWT token for automatic login
       localStorage.setItem("token", res.data.token);
       navigate("/");
     } catch (error) {
