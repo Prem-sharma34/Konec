@@ -4,6 +4,8 @@ from routes.auth import auth_bp
 from extension import mail
 from routes.profile import profile_bp
 from routes.find_user import find_user_bp
+from routes.friends import friends_bp
+from routes.friendsList import friends_list_bp
 from flask_jwt_extended import JWTManager
 import os
 from dotenv import load_dotenv
@@ -43,9 +45,11 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     return response
 
-app.register_blueprint(auth_bp, url_prefix="/api/auth")
-app.register_blueprint(profile_bp, url_prefix="/api/profile")
+app.register_blueprint(auth_bp, url_prefix="/auth")
+app.register_blueprint(profile_bp, url_prefix="/profile")
 app.register_blueprint(find_user_bp, url_prefix="/find_user")
+app.register_blueprint(friends_bp, url_prefix="/friends")
+app.register_blueprint(friends_list_bp, url_prefix="/friends_list")
 
 
 

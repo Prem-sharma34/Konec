@@ -14,7 +14,7 @@ firebase_admin.initialize_app(cred , {
 # Creates a reference to the Firestore database, allowing us to read and write data
 firestore_db = firestore.client()
 
-realtime_db = db.reference("/")
+realtime_db = db
 
 firebase_auth = auth
 
