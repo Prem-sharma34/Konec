@@ -1,13 +1,9 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS 
 from routes.auth import auth_bp
-from routes.users import users_bp
-from routes.realtime import realtime_bp
-from routes.chat import chat_bp
-from routes.friends import friends_bp
-from routes.friend_requests import friend_requests_bp  
 from extension import mail
 from routes.profile import profile_bp
+from routes.find_user import find_user_bp
 from flask_jwt_extended import JWTManager
 import os
 from dotenv import load_dotenv
@@ -48,11 +44,8 @@ def after_request(response):
     return response
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
-app.register_blueprint(users_bp, url_prefix="/api/users")
-app.register_blueprint(chat_bp,url_prefix= "/api/chat")
-app.register_blueprint(friends_bp,url_prefix="/api/friends")
-app.register_blueprint(friend_requests_bp, url_prefix="/api/friend-requests")
 app.register_blueprint(profile_bp, url_prefix="/api/profile")
+app.register_blueprint(find_user_bp, url_prefix="/find_user")
 
 
 

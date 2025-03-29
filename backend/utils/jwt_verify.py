@@ -13,5 +13,5 @@ def verify_token():
         
         return user_id if user_id else None  # Return None if invalid
     except Exception as e:
-        print("❌ Token Verification Failed:", str(e))  # Debugging line
+        print("Token Verification Failed:", str(e))  # Debugging line
         return None  # Return None instead of JSON response

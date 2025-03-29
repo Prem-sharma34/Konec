@@ -123,7 +123,7 @@ def verify_email():
         if not uid:
             return jsonify({"error": "Missing user UID"}), 400
 
-        # ✅ Get user details from Firebase Auth
+        # Get user details from Firebase Auth
         user = auth.get_user(uid)
 
         if user.email_verified:
@@ -218,7 +218,7 @@ def send_reset_email(email, reset_link):
             body=f"Click the link to reset your password: {reset_link}"
         )
         mail.send(msg)
-        print(f"✅ Password reset email sent to {email}")
+        print(f"Password reset email sent to {email}")
     except Exception as e:
         print(f"Failed to send reset email: {str(e)}")
 
@@ -243,7 +243,7 @@ def google_signup():
         if not email or not name:
             return jsonify({"error": "Invalid Google data"}), 400
 
-        # ✅ Check if user already exists
+        # Check if user already exists
         user_ref = firestore_db.collection("users").where("email", "==", email).limit(1).get()
         if user_ref:
             return jsonify({"error": "User already exists, please login"}), 400
@@ -251,7 +251,7 @@ def google_signup():
        
         username = generate_unique_username(name)
 
-        # ✅ Store user in Firestore
+        # Store user in Firestore
         user_data = {
             "uid": uid,
             "email": email,
