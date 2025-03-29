@@ -20,6 +20,10 @@ if not SECRET_KEY:
 
 auth_bp = Blueprint("auth", __name__)
 
+
+## Username and token generation
+
+
 def generate_unique_username(display_name: str) -> str:
     """Generate a unique username based on display name."""
     base_username = re.sub(r'[^a-z0-9_]', '', display_name.lower())[:15]
@@ -42,6 +46,9 @@ def generate_token(uid: str, email: str) -> str:
         raise ValueError("SECRET_KEY not configured")
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
+
+
+# Signup and login feature
 @auth_bp.route("/signup", methods=["POST"])
 def signup() -> tuple[Dict[str, str], int]:
     """Handle user signup with email, password, and display name."""
@@ -222,6 +229,11 @@ def send_reset_email(email, reset_link):
     except Exception as e:
         print(f"Failed to send reset email: {str(e)}")
 
+
+
+
+
+### Google login and signup feature
 
 
 @auth_bp.route("/google-signup", methods=["POST"])
