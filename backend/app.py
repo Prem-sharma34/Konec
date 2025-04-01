@@ -38,7 +38,9 @@ app.config["JWT_IDENTITY_CLAIM"] = "uid"
 
 jwt = JWTManager(app)
 
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}) 
+
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
+ 
 
 @app.after_request
 def after_request(response):
