@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { Box, Button, Typography, Container, Paper, CircularProgress, Alert } from "@mui/material";
+import EmailIcon from "@mui/icons-material/Email";
 
 const VerifyEmail = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
-
   const uid = localStorage.getItem("uid");
 
   const checkVerification = async () => {
@@ -42,33 +43,64 @@ const VerifyEmail = () => {
   }, [uid, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md text-center">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Verify Your Email</h2>
-        <p className="text-gray-600 mb-6">
-          We’ve sent a verification link to your email. Please check your inbox (and spam folder) to confirm your account.
-        </p>
-        
-        {message && (
-          <p className={`text-sm mb-4 ${message.includes("not yet") ? "text-gray-600" : "text-red-500"}`}>
-            {message}
-          </p>
-        )}
-
-        <button
-          onClick={checkVerification}
-          className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400"
-          disabled={loading}
+    <Box 
+      sx={{ 
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'background.default',
+        py: 3
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper 
+          elevation={4} 
+          sx={{ 
+            borderRadius: 3,
+            py: 5,
+            px: 4,
+            textAlign: 'center',
+            backgroundColor: 'background.paper'
+          }}
         >
-          {loading ? "Checking..." : "I’ve Verified My Email"}
-        </button>
-
-        <p className="mt-4 text-gray-600">
-          Didn’t receive the email? Check spam or{" "}
-          <span className="text-blue-600 hover:underline cursor-pointer">resend it</span>.
-        </p>
-      </div>
-    </div>
+          <EmailIcon color="primary" sx={{ fontSize: 50, mb: 2 }} />
+          <Typography variant="h5" fontWeight={600} gutterBottom>
+            Verify Your Email
+          </Typography>
+          <Typography variant="body1" color="text.secondary" mb={3}>
+            We've sent a verification link to your email. Please check your inbox (and spam folder) to confirm your account.
+          </Typography>
+          
+          {message && (
+            <Alert severity={message.includes("not yet") ? "info" : "error"} sx={{ mb: 3 }}>
+              {message}
+            </Alert>
+          )}
+          
+          <Button 
+            variant="contained" 
+            fullWidth 
+            sx={{ py: 1.5, mb: 2 }} 
+            onClick={checkVerification} 
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : "I’ve Verified My Email"}
+          </Button>
+          
+          <Typography variant="body2" color="text.secondary">
+            Didn’t receive the email? Check spam or {" "}
+            <Typography 
+              component="span" 
+              color="primary" 
+              sx={{ cursor: 'pointer', fontWeight: 500, '&:hover': { textDecoration: 'underline' } }}
+            >
+              resend it
+            </Typography>.
+          </Typography>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

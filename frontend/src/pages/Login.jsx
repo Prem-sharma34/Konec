@@ -2,6 +2,18 @@ import { useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { auth, provider, signInWithPopup } from "../utils/firebaseConfig";
 import { useNavigate, Link } from "react-router-dom";
+import { 
+  Box, 
+  Button, 
+  TextField, 
+  Typography, 
+  Container, 
+  Paper, 
+  Divider,
+  Alert,
+  CircularProgress
+} from "@mui/material";
+import GoogleIcon from "@mui/icons-material/Google";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -90,80 +102,113 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Log In</h2>
+    <Box 
+      sx={{ 
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 3,
+        backgroundColor: 'background.default',
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            borderRadius: 2,
+            py: 4,
+            px: { xs: 3, sm: 5 },
+          }}
+        >
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            align="center" 
+            fontWeight="500" 
+            mb={4}
+            color="primary"
+          >
+            Log In
+          </Typography>
+          
+          {message.text && (
+            <Alert 
+              severity={message.isError ? "error" : "success"} 
+              sx={{ mb: 3 }}
+            >
+              {message.text}
+            </Alert>
+          )}
 
-        {message.text && (
-          <p className={`text-sm mb-4 text-center ${message.isError ? "text-red-500" : "text-green-500"}`}>
-            {message.text}
-          </p>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <input
-              type="email"
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Email Address"
               name="email"
-              placeholder="Email"
+              type="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={loading}
+              autoFocus
             />
-          </div>
-          <div>
-            <input
-              type="password"
+            <TextField
+              margin="normal"
+              required
+              fullWidth
               name="password"
-              placeholder="Password"
+              label="Password"
+              type="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={loading}
             />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-400"
-            disabled={loading}
-          >
-            {loading ? "Logging In..." : "Log In"}
-          </button>
-        </form>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2, py: 1.5 }}
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={24} /> : "Log In"}
+            </Button>
+          </Box>
 
-        <div className="mt-6">
-          <button
+          <Divider sx={{ my: 3 }}>or</Divider>
+          
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<GoogleIcon />}
             onClick={handleGoogleLogin}
-            className="w-full bg-red-600 text-white p-3 rounded-md hover:bg-red-700 transition-colors disabled:bg-red-400 flex items-center justify-center space-x-2"
             disabled={loading}
+            sx={{ py: 1.5 }}
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M12.545,10.917v3.418h5.637c-.23,1.223-.906,2.258-1.908,2.977v2.475h3.082c1.805-1.664,2.854-4.11,2.854-6.908c0-.664-.066-1.318-.19-1.962h-9.475Z"
-              />
-              <path
-                fill="currentColor"
-                d="M12,21.5c-2.695,0-5.13-1.027-6.977-2.695l-3.082,2.475C4.318,23.682,8.023,25,12,25c3.49,0,6.627-1.318,9-3.477v-3.082h-3.082C16.627,20.182,14.49,21.5,12,21.5Z"
-              />
-              <path
-                fill="currentColor"
-                d="M5.023,7.318L1.941,9.793C3.789,11.462,6.223,12.5,9,12.5c1.223,0,2.34-.27,3.418-.705v-3.418H5.477c-.066.664-.477,1.258-.477,1.962s.412,1.298.477,1.962h6.941c.23-1.223.906-2.258,1.908-2.977l-9.305-.004Z"
-              />
-            </svg>
-            <span>{loading ? "Processing..." : "Log In with Google"}</span>
-          </button>
-        </div>
-
-        <p className="mt-4 text-center text-gray-600 text-sm">
-          Don’t have an account?{" "}
-          <Link to="/signup" className="text-blue-600 hover:underline">
-            Sign up here
-          </Link>
-        </p>
-      </div>
-    </div>
+            {loading ? <CircularProgress size={24} /> : "Log In with Google"}
+          </Button>
+          
+          <Box mt={3} textAlign="center">
+            <Typography variant="body2" color="text.secondary">
+              Don't have an account?{" "}
+              <Link to="/signup" style={{ textDecoration: 'none' }}>
+                <Typography 
+                  component="span" 
+                  color="primary"
+                  sx={{ 
+                    fontWeight: 500,
+                    '&:hover': { textDecoration: 'underline' } 
+                  }}
+                >
+                  Sign up here
+                </Typography>
+              </Link>
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

@@ -2,6 +2,18 @@ import { useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { auth, provider, signInWithPopup } from "../utils/firebaseConfig";
 import { useNavigate, Link } from "react-router-dom";
+import { 
+  Box, 
+  Button, 
+  TextField, 
+  Typography, 
+  Container, 
+  Paper, 
+  Divider,
+  Alert,
+  CircularProgress
+} from "@mui/material";
+import GoogleIcon from "@mui/icons-material/Google";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -96,91 +108,124 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Sign Up</h2>
-        
-        {error && (
-          <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
-        )}
+    <Box 
+      sx={{ 
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 3,
+        backgroundColor: 'background.default',
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            borderRadius: 2,
+            py: 4,
+            px: { xs: 3, sm: 5 },
+          }}
+        >
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            align="center" 
+            fontWeight="500" 
+            mb={4}
+            color="primary"
+          >
+            Sign Up
+          </Typography>
+          
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ mb: 3 }}
+            >
+              {error}
+            </Alert>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <input
-              type="text"
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Display Name"
               name="displayName"
-              placeholder="Display Name"
               value={formData.displayName}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               disabled={loading}
+              autoFocus
             />
-          </div>
-          <div>
-            <input
-              type="email"
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Email Address"
               name="email"
-              placeholder="Email"
+              type="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               disabled={loading}
             />
-          </div>
-          <div>
-            <input
-              type="password"
+            <TextField
+              margin="normal"
+              required
+              fullWidth
               name="password"
-              placeholder="Password"
+              label="Password"
+              type="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               disabled={loading}
+              helperText="Password must be at least 8 characters"
             />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400"
-            disabled={loading}
-          >
-            {loading ? "Signing Up..." : "Sign Up"}
-          </button>
-        </form>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2, py: 1.5 }}
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={24} /> : "Sign Up"}
+            </Button>
+          </Box>
 
-        <div className="mt-6">
-          <button
+          <Divider sx={{ my: 3 }}>or</Divider>
+          
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<GoogleIcon />}
             onClick={handleGoogleSignup}
-            className="w-full bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 transition disabled:bg-red-400 flex items-center justify-center space-x-2"
             disabled={loading}
+            sx={{ py: 1.5 }}
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M12.24 10.32v3.36h5.52c-.24 1.44-.96 2.64-2.16 3.36v2.88h3.36c1.92-1.68 3.12-4.32 3.12-7.44 0-.72-.12-1.44-.24-2.16h-9.6z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 21.6c3.36 0 6.24-1.2 8.4-3.12l-3.36-2.88c-1.2.84-2.64 1.44-4.32 1.44-3.36 0-6.24-2.28-7.2-5.52H2.16v3.36C4.32 19.44 8.04 21.6 12 21.6z"
-              />
-              <path
-                fill="currentColor"
-                d="M4.8 12.72c-.24-.72-.36-1.44-.36-2.16s.12-1.44.36-2.16V5.04H2.16C1.44 6.48 1 8.04 1 9.6s.48 3.12 1.2 4.56l2.64-1.44z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 2.4c2.04 0 3.84.72 5.28 1.92l3.12-3.12C18.24.72 15.36 0 12 0 8.04 0 4.32 2.16 2.16 5.04l2.64 1.44C6 4.32 8.88 2.4 12 2.4z"
-              />
-            </svg>
-            <span>{loading ? "Processing..." : "Sign Up with Google"}</span>
-          </button>
-        </div>
-
-        <p className="mt-4 text-center text-gray-600">
-          Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline">Login here</Link>
-        </p>
-      </div>
-    </div>
+            {loading ? <CircularProgress size={24} /> : "Sign Up with Google"}
+          </Button>
+          
+          <Box mt={3} textAlign="center">
+            <Typography variant="body2" color="text.secondary">
+              Already have an account?{" "}
+              <Link to="/login" style={{ textDecoration: 'none' }}>
+                <Typography 
+                  component="span" 
+                  color="primary"
+                  sx={{ 
+                    fontWeight: 500,
+                    '&:hover': { textDecoration: 'underline' } 
+                  }}
+                >
+                  Login here
+                </Typography>
+              </Link>
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 
