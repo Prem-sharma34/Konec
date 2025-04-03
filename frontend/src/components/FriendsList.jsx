@@ -1,41 +1,132 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  List,
+  ListItem,
+  ListItemAvatar,
+  Avatar,
+  ListItemText,
+  CircularProgress,
+  Snackbar,
+  Alert,
+} from "@mui/material";
+import axiosInstance from "../utils/axiosInstance";
 
 const FriendsList = ({ user, setSelectedFriend }) => {
   const [friends, setFriends] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [selectedUsername, setSelectedUsername] = useState(null);
 
   useEffect(() => {
-    if (!user || !user.email) return;
+    if (!user?.username) {
+      setError("You must be logged in to view your friends list");
+      return;
+    }
 
-    axios.get(`http://127.0.0.1:5000/api/friends/list?user=${user.email}`)
-      .then((response) => {
-        console.log("📋 Friends API Response:", response.data);  // ✅ Debugging line
-        setFriends(response.data.friends || []);  // ✅ Ensure an empty array if no friends
-      })
-      .catch((error) => {
+    const fetchFriends = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const response = await axiosInstance.get("/friends_list/friends_list", {
+          params: { username: user.username },
+        });
+        console.log("📋 Friends API Response:", response.data);
+        setFriends(response.data.friends || []);
+      } catch (error) {
         console.error("❌ Error fetching friends:", error);
-      });
+        setError(error.response?.data?.error || "Error fetching friends list");
+        setSnackbarOpen(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFriends();
   }, [user]);
 
+  const handleFriendClick = (friend) => {
+    setSelectedFriend(friend);
+    setSelectedUsername(friend.username);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
   return (
-    <div>
-      <h2>Friends List</h2>
-      {friends.length > 0 ? (
-        <ul>
-          {friends.map((friend) => (
-            <li 
-              key={friend.email} 
-              onClick={() => setSelectedFriend(friend)} 
-              className="cursor-pointer p-2 border-b hover:bg-gray-200"
-            >
-              {friend.display_name} ({friend.email})
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No friends found.</p>
+    <Box
+      sx={{
+        p: 2,
+        bgcolor: "white",
+        borderRadius: 2,
+        boxShadow: 1,
+        height: "calc(100vh - 120px)", // Adjust for navbar and padding
+        overflowY: "auto",
+      }}
+    >
+      <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
+        Friends
+      </Typography>
+
+      {loading && (
+        <CircularProgress sx={{ display: "block", mx: "auto", mb: 2 }} />
       )}
-    </div>
+
+      {friends.length > 0 ? (
+        <List>
+          {friends.map((friend) => (
+            <ListItem
+              key={friend.username}
+              onClick={() => handleFriendClick(friend)}
+              sx={{
+                cursor: "pointer",
+                bgcolor:
+                  selectedUsername === friend.username
+                    ? "primary.light"
+                    : "transparent",
+                "&:hover": { bgcolor: "grey.100" },
+                borderRadius: 1,
+                mb: 0.5,
+              }}
+            >
+              <ListItemAvatar>
+                <Avatar src={friend.profile_pic} alt={friend.display_name}>
+                  {friend.display_name?.charAt(0) || "U"}
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={friend.display_name}
+                secondary={`@${friend.username}`}
+              />
+            </ListItem>
+          ))}
+        </List>
+      ) : (
+        !loading && (
+          <Typography color="textSecondary" sx={{ textAlign: "center" }}>
+            No friends found
+          </Typography>
+        )
+      )}
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 };
 

@@ -1,69 +1,173 @@
 import { useState } from "react";
-import axios from "axios";
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  Avatar,
+  ListItemText,
+  IconButton,
+} from "@mui/material";
+import { PersonAdd } from "@mui/icons-material";
+import axiosInstance from "../utils/axiosInstance";
 
 const FindUsers = ({ user }) => {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSearch = async () => {
-    if (!search) return;
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        `http://127.0.0.1:5000/api/users/search?name=${search}`
-      );
-      setUsers(response.data);
-    } catch (error) {
-      console.error("❌ Error searching users:", error);
+    if (!search.trim()) {
+      setError("Please enter a search query");
+      return;
     }
-    setLoading(false);
+    setLoading(true);
+    setError("");
+    setMessage("");
+    try {
+      const response = await axiosInstance.get("/find_user/find", {
+        params: { search: search.trim() },
+      });
+      console.log("Search Response:", response.data); // Debug log
+      if (response.data.success) {
+        setUsers(response.data.users || []);
+        if (response.data.users.length === 0) {
+          setMessage("No users found");
+        }
+      } else {
+        setError(response.data.message || "Failed to search users");
+      }
+    } catch (error) {
+      console.error("Search Error:", error); // Debug log
+      setError(
+        error.response?.data?.message || 
+        error.message || 
+        "Error searching users"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const sendFriendRequest = async (receiverEmail) => {
-    if (!user) {
-      console.error("❌ No logged-in user found, cannot send request.");
+  const sendFriendRequest = async (receiver_username) => {
+    if (!user?.username) {
+      setError("You must be logged in to send friend requests");
+      return;
+    }
+    if (receiver_username === user.username) {
+      setError("You cannot send a friend request to yourself");
       return;
     }
 
-    console.log("📤 Sending friend request to:", receiverEmail);
-    console.log("🟢 Sender:", user.email);  // ✅ Debugging sender email
-
+    setLoading(true);
+    setError("");
+    setMessage("");
     try {
-      const response = await axios.post("http://127.0.0.1:5000/api/friends/request", {
-        sender: user.email,  // ✅ Ensure `user.email` is correct
-        receiver: receiverEmail,
+      const response = await axiosInstance.post("/friends/friends_request", {
+        receiver_username,
       });
-
-      console.log("✅ Friend request sent successfully!", response.data);
-      alert("Friend request sent!");
+      console.log("Friend Request Response:", response.data); // Debug log
+      setMessage(response.data.message || "Friend request sent!");
+      setUsers(users.filter((u) => u.username !== receiver_username));
     } catch (error) {
-      console.error("❌ Error sending friend request:", error.response?.data || error.message);
+      console.error("Friend Request Error:", error); // Debug log
+      setError(
+        error.response?.data?.error || 
+        error.message || 
+        "Error sending friend request"
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h3>Find Friends</h3>
-      <input
-        type="text"
-        placeholder="Enter name"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      <button onClick={handleSearch} disabled={loading}>
-        {loading ? "Searching..." : "Search"}
-      </button>
+    <Box
+      sx={{
+        p: 2,
+        bgcolor: "white",
+        borderRadius: 2,
+        boxShadow: 1,
+        width: "100%",
+        maxWidth: 600,
+        mx: "auto",
+      }}
+    >
+      <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
+        Find Friends
+      </Typography>
 
-      <ul>
-        {users.map((u) => (
-          <li key={u.email}>
-            {u.display_name} ({u.email}){" "}
-            <button onClick={() => sendFriendRequest(u.email)}>Add Friend</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+        <TextField
+          label="Search by username or display name"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          fullWidth
+          variant="outlined"
+          disabled={loading}
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSearch}
+          disabled={loading}
+        >
+          {loading ? <CircularProgress size={24} /> : "Search"}
+        </Button>
+      </Box>
+
+      {error && (
+        <Typography color="error" sx={{ mb: 2, textAlign: "center" }}>
+          {error}
+        </Typography>
+      )}
+      {message && (
+        <Typography color="success.main" sx={{ mb: 2, textAlign: "center" }}>
+          {message}
+        </Typography>
+      )}
+
+      {users.length > 0 ? (
+        <List>
+          {users.map((u) => (
+            <ListItem
+              key={u.username}
+              secondaryAction={
+                <IconButton
+                  edge="end"
+                  onClick={() => sendFriendRequest(u.username)}
+                  disabled={loading || u.username === user?.username}
+                >
+                  <PersonAdd color="primary" />
+                </IconButton>
+              }
+            >
+              <ListItemAvatar>
+                <Avatar src={u.profilePic} alt={u.display_name}>
+                  {u.display_name?.charAt(0) || "U"}
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={u.display_name}
+                secondary={`@${u.username}`}
+              />
+            </ListItem>
+          ))}
+        </List>
+      ) : (
+        !loading && !message && (
+          <Typography color="textSecondary" sx={{ textAlign: "center" }}>
+            No users to display
+          </Typography>
+        )
+      )}
+    </Box>
   );
 };
 
