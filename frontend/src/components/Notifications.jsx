@@ -20,7 +20,7 @@ const Notifications = ({ user }) => {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (!user?.username) return;
+    if (!user?.uid) return;
 
     const fetchRequests = async () => {
       setLoading(true);
@@ -38,16 +38,16 @@ const Notifications = ({ user }) => {
     fetchRequests();
   }, [user]);
 
-  const acceptRequest = async (sender_username) => {
+  const acceptRequest = async (sender_id) => {
     setLoading(true);
     setError("");
     setMessage("");
     try {
       const response = await axiosInstance.post("/friends/accept_request", {
-        sender_username,
+        sender_id,
       });
       setMessage(response.data.message || "Friend request accepted!");
-      setRequests(requests.filter((r) => r.sender_username !== sender_username));
+      setRequests(requests.filter((r) => r.sender_id !== sender_id));
     } catch (error) {
       setError(error.response?.data?.error || "Error accepting request");
     } finally {
@@ -55,16 +55,16 @@ const Notifications = ({ user }) => {
     }
   };
 
-  const rejectRequest = async (sender_username) => {
+  const rejectRequest = async (sender_id) => {
     setLoading(true);
     setError("");
     setMessage("");
     try {
       const response = await axiosInstance.post("/friends/reject_request", {
-        sender_username,
+        sender_id,
       });
       setMessage(response.data.message || "Friend request rejected!");
-      setRequests(requests.filter((r) => r.sender_username !== sender_username));
+      setRequests(requests.filter((r) => r.sender_id !== sender_id));
     } catch (error) {
       setError(error.response?.data?.error || "Error rejecting request");
     } finally {
@@ -108,7 +108,7 @@ const Notifications = ({ user }) => {
         <List>
           {requests.map((r) => (
             <ListItem
-              key={r.sender_username}
+              key={r.sender_id}
               secondaryAction={
                 <Box sx={{ display: "flex", gap: 1 }}>
                   <Button
@@ -116,7 +116,7 @@ const Notifications = ({ user }) => {
                     color="success"
                     size="small"
                     startIcon={<Check />}
-                    onClick={() => acceptRequest(r.sender_username)}
+                    onClick={() => acceptRequest(r.sender_id)}
                     disabled={loading}
                   >
                     Accept
@@ -126,7 +126,7 @@ const Notifications = ({ user }) => {
                     color="error"
                     size="small"
                     startIcon={<Close />}
-                    onClick={() => rejectRequest(r.sender_username)}
+                    onClick={() => rejectRequest(r.sender_id)}
                     disabled={loading}
                   >
                     Reject

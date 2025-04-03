@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Box, CssBaseline } from "@mui/material";
 import Navbar from "../components/Navbar";
-import ChatBox from "../components/ChatBox";
 import FriendsList from "../components/FriendsList";
 import Profile from "../components/Profile";
 import Notifications from "../components/Notifications";
