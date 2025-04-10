@@ -53,14 +53,19 @@ const Login = () => {
         throw new Error("Invalid response from server: Missing token");
       }
 
+      // Ensure we use a consistent id field (use the backend's uid as id)
       const userData = {
         email: res.data.email,
         username: res.data.username,
         display_name: res.data.display_name,
-        id:res.data.uid
+        id: res.data.uid,
+        uid: res.data.uid // Keep uid as well for compatibility
       };
+      
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(userData));
+      console.log("User stored in localStorage:", userData);
+      
       setMessage({ text: "Login successful!", isError: false });
       navigate("/");
     } catch (error) {
@@ -85,13 +90,19 @@ const Login = () => {
         throw new Error("Invalid response from server: Missing token");
       }
 
+      // Ensure we use a consistent id field
       const userData = {
         email: result.user.email,
         username: res.data.username,
         display_name: res.data.display_name,
+        id: res.data.uid,
+        uid: res.data.uid // Keep uid as well for compatibility
       };
+      
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(userData));
+      console.log("User stored in localStorage:", userData);
+      
       setMessage({ text: "Google login successful!", isError: false });
       navigate("/");
     } catch (error) {

@@ -27,6 +27,7 @@ def find_user():
             user_id = doc.id  # Unique document ID
             if user_id not in users:
                 users[user_id] = {
+                    "id": user_id,  # Include the user ID in the response
                     "display_name": user_data.get("display_name", ""),
                     "username": user_data.get("username", ""),
                     "profilePic": user_data.get("profilePic", "")
