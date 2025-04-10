@@ -38,6 +38,29 @@ const Notifications = ({ user }) => {
     fetchRequests();
   }, [user]);
 
+  useEffect(() => {
+    const fetchPendingRequests = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const response = await axiosInstance.get("/friends/pending_requests");
+        console.log("Pending Requests Response:", response.data); // Debug log
+        setPendingRequests(response.data.requests || []);
+      } catch (error) {
+        console.error("Fetch Pending Requests Error:", error); // Debug log
+        setError(
+          error.response?.data?.error || 
+          error.message || 
+          "Error fetching pending requests"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPendingRequests();
+  }, []);
+
   const acceptRequest = async (sender_id) => {
     setLoading(true);
     setError("");

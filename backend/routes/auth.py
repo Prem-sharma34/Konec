@@ -74,6 +74,7 @@ def signup() -> tuple[Dict[str, str], int]:
             "email": email,
             "display_name": display_name,
             "username": username,
+            "uid": user.uid,
             "profilePic": "",
             "whoami": "",
             "verified": False,

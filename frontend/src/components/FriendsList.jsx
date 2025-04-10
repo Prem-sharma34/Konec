@@ -61,6 +61,52 @@ const FriendsList = ({ user, setSelectedFriend }) => {
     setSnackbarOpen(false);
   };
 
+  const handleAcceptRequest = async (sender_id) => {
+    setLoading(true);
+    setError("");
+    setMessage("");
+    try {
+      const response = await axiosInstance.post("/friends/accept_request", {
+        sender_id, // Backend expects sender_id
+      });
+      console.log("Accept Request Response:", response.data); // Debug log
+      setMessage(response.data.message || "Friend request accepted!");
+      setPendingRequests(pendingRequests.filter((req) => req.sender_id !== sender_id));
+    } catch (error) {
+      console.error("Accept Request Error:", error); // Debug log
+      setError(
+        error.response?.data?.error || 
+        error.message || 
+        "Error accepting friend request"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRejectRequest = async (sender_id) => {
+    setLoading(true);
+    setError("");
+    setMessage("");
+    try {
+      const response = await axiosInstance.post("/friends/reject_request", {
+        sender_id, // Backend expects sender_id
+      });
+      console.log("Reject Request Response:", response.data); // Debug log
+      setMessage(response.data.message || "Friend request rejected!");
+      setPendingRequests(pendingRequests.filter((req) => req.sender_id !== sender_id));
+    } catch (error) {
+      console.error("Reject Request Error:", error); // Debug log
+      setError(
+        error.response?.data?.error || 
+        error.message || 
+        "Error rejecting friend request"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Box
       sx={{

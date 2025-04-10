@@ -55,26 +55,29 @@ const FindUsers = ({ user }) => {
     }
   };
 
-  const sendFriendRequest = async (receiver_username) => {
-    if (!user?.username) {
+  const sendFriendRequest = async (receiver_id) => {
+    if (!user?.id) {
       setError("You must be logged in to send friend requests");
       return;
     }
-    if (receiver_username === user.username) {
+    if (receiver_id === user.id) {
       setError("You cannot send a friend request to yourself");
       return;
     }
+
+    console.log("Sending Friend Request to:", receiver_id);
+    console.log("Current User ID:", user?.id);
 
     setLoading(true);
     setError("");
     setMessage("");
     try {
       const response = await axiosInstance.post("/friends/friends_request", {
-        receiver_username,
+        receiver_id, // Ensure this is the UID
       });
       console.log("Friend Request Response:", response.data); // Debug log
       setMessage(response.data.message || "Friend request sent!");
-      setUsers(users.filter((u) => u.username !== receiver_username));
+      setUsers(users.filter((u) => u.id !== receiver_id)); // Filter by UID
     } catch (error) {
       console.error("Friend Request Error:", error); // Debug log
       setError(
@@ -137,12 +140,12 @@ const FindUsers = ({ user }) => {
         <List>
           {users.map((u) => (
             <ListItem
-              key={u.username}
+              key={u.id || u.username} // Ensure the key is unique
               secondaryAction={
                 <IconButton
                   edge="end"
-                  onClick={() => sendFriendRequest(u.username)}
-                  disabled={loading || u.username === user?.username}
+                  onClick={() => sendFriendRequest(u.id)} // Pass UID as receiver_id
+                  disabled={loading || (user?.id && u.id === user.id)} // Disable for self
                 >
                   <PersonAdd color="primary" />
                 </IconButton>
