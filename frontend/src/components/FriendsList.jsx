@@ -10,7 +10,13 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
+  Badge,
+  Divider,
+  TextField,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
+import { Search, Clear } from "@mui/icons-material";
 import axiosInstance from "../utils/axiosInstance";
 
 const FriendsList = ({ user, setSelectedFriend }) => {
@@ -19,9 +25,9 @@ const FriendsList = ({ user, setSelectedFriend }) => {
   const [error, setError] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [selectedFriendId, setSelectedFriendId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-
     const fetchFriends = async () => {
       setLoading(true);
       setError(null);
@@ -35,7 +41,13 @@ const FriendsList = ({ user, setSelectedFriend }) => {
         console.log("✅ Friends API Response:", response.data);
 
         if (response.data.friends) {
-          setFriends(response.data.friends);
+          // Add a placeholder for last message
+          const friendsWithChatInfo = response.data.friends.map(friend => ({
+            ...friend,
+            last_message: null,
+            unread_count: 0,
+          }));
+          setFriends(friendsWithChatInfo);
         } else {
           setFriends([]);
           setError("No friends found");
@@ -61,99 +73,145 @@ const FriendsList = ({ user, setSelectedFriend }) => {
     setSnackbarOpen(false);
   };
 
-  const handleAcceptRequest = async (sender_id) => {
-    setLoading(true);
-    setError("");
-    setMessage("");
-    try {
-      const response = await axiosInstance.post("/friends/accept_request", {
-        sender_id, // Backend expects sender_id
-      });
-      console.log("Accept Request Response:", response.data); // Debug log
-      setMessage(response.data.message || "Friend request accepted!");
-      setPendingRequests(pendingRequests.filter((req) => req.sender_id !== sender_id));
-    } catch (error) {
-      console.error("Accept Request Error:", error); // Debug log
-      setError(
-        error.response?.data?.error || 
-        error.message || 
-        "Error accepting friend request"
-      );
-    } finally {
-      setLoading(false);
-    }
+  const clearSearch = () => {
+    setSearchQuery("");
   };
 
-  const handleRejectRequest = async (sender_id) => {
-    setLoading(true);
-    setError("");
-    setMessage("");
-    try {
-      const response = await axiosInstance.post("/friends/reject_request", {
-        sender_id, // Backend expects sender_id
-      });
-      console.log("Reject Request Response:", response.data); // Debug log
-      setMessage(response.data.message || "Friend request rejected!");
-      setPendingRequests(pendingRequests.filter((req) => req.sender_id !== sender_id));
-    } catch (error) {
-      console.error("Reject Request Error:", error); // Debug log
-      setError(
-        error.response?.data?.error || 
-        error.message || 
-        "Error rejecting friend request"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Filter friends based on search query
+  const filteredFriends = searchQuery
+    ? friends.filter(friend => 
+        friend.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        friend.username.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : friends;
 
   return (
     <Box
       sx={{
-        p: 2,
+        display: "flex",
+        flexDirection: "column",
         bgcolor: "white",
         borderRadius: 2,
         boxShadow: 1,
-        height: "calc(100vh - 120px)",
-        overflowY: "auto",
+        height: "100%",
+        overflow: "hidden",
       }}
     >
-      <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
+      <Typography variant="h6" sx={{ p: 2, textAlign: "center", borderBottom: "1px solid #f0f0f0" }}>
         Friends
       </Typography>
 
-      {loading && <CircularProgress sx={{ display: "block", mx: "auto", mb: 2 }} />}
+      {/* Search box */}
+      <Box sx={{ px: 2, py: 1, borderBottom: "1px solid #f0f0f0" }}>
+        <TextField
+          fullWidth
+          placeholder="Search friends..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          variant="outlined"
+          size="small"
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search fontSize="small" color="action" />
+              </InputAdornment>
+            ),
+            endAdornment: searchQuery ? (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={clearSearch}>
+                  <Clear fontSize="small" />
+                </IconButton>
+              </InputAdornment>
+            ) : null,
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+            },
+          }}
+        />
+      </Box>
 
-      {!loading && friends.length > 0 ? (
-        <List>
-          {friends.map((friend) => (
-            <ListItem
-              key={friend.user_id}
-              onClick={() => handleFriendClick(friend)}
-              sx={{
-                cursor: "pointer",
-                bgcolor: selectedFriendId === friend.user_id ? "primary.light" : "transparent",
-                "&:hover": { bgcolor: "grey.100" },
-                borderRadius: 1,
-                mb: 0.5,
-              }}
-            >
-              <ListItemAvatar>
-                <Avatar src={friend.profile_pic} alt={friend.display_name}>
-                  {friend.display_name?.charAt(0) || "U"}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={friend.display_name} secondary={`@${friend.username}`} />
-            </ListItem>
-          ))}
-        </List>
-      ) : (
-        !loading && (
-          <Typography color="textSecondary" sx={{ textAlign: "center" }}>
-            {error || "No friends found"}
-          </Typography>
-        )
-      )}
+      {/* Friends list */}
+      <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
+        {loading && (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+            <CircularProgress />
+          </Box>
+        )}
+
+        {!loading && filteredFriends.length > 0 ? (
+          <List disablePadding>
+            {filteredFriends.map((friend, index) => (
+              <Box key={friend.user_id}>
+                <ListItem
+                  onClick={() => handleFriendClick(friend)}
+                  sx={{
+                    cursor: "pointer",
+                    bgcolor: selectedFriendId === friend.user_id ? "primary.light" : "transparent",
+                    color: selectedFriendId === friend.user_id ? "primary.contrastText" : "inherit",
+                    "&:hover": { bgcolor: selectedFriendId === friend.user_id ? "primary.main" : "grey.100" },
+                    py: 1.5,
+                  }}
+                >
+                  <ListItemAvatar>
+                    <Badge
+                      color="primary"
+                      badgeContent={friend.unread_count}
+                      invisible={!friend.unread_count}
+                    >
+                      <Avatar 
+                        src={friend.profile_pic} 
+                        alt={friend.display_name}
+                        sx={{ 
+                          width: 45, 
+                          height: 45,
+                          border: selectedFriendId === friend.user_id ? "2px solid white" : "none"
+                        }}
+                      >
+                        {friend.display_name?.charAt(0) || "U"}
+                      </Avatar>
+                    </Badge>
+                  </ListItemAvatar>
+                  <ListItemText 
+                    primary={friend.display_name} 
+                    secondary={
+                      friend.last_message ? 
+                        (friend.last_message.length > 25 ? 
+                          friend.last_message.substring(0, 25) + "..." : 
+                          friend.last_message) : 
+                        `@${friend.username}`
+                    }
+                    primaryTypographyProps={{
+                      fontWeight: friend.unread_count ? 'bold' : 'normal',
+                    }}
+                    secondaryTypographyProps={{
+                      color: selectedFriendId === friend.user_id ? 'rgba(255, 255, 255, 0.7)' : 'text.secondary',
+                      fontWeight: friend.unread_count ? 'medium' : 'normal',
+                    }}
+                  />
+                </ListItem>
+                {index < filteredFriends.length - 1 && (
+                  <Divider variant="inset" component="li" />
+                )}
+              </Box>
+            ))}
+          </List>
+        ) : (
+          !loading && (
+            <Box sx={{ p: 4, textAlign: "center" }}>
+              <Typography color="textSecondary">
+                {searchQuery ? "No matching friends found" : (error || "No friends found")}
+              </Typography>
+              {searchQuery && (
+                <Typography variant="body2" color="primary" sx={{ mt: 1, cursor: "pointer" }} onClick={clearSearch}>
+                  Clear search
+                </Typography>
+              )}
+            </Box>
+          )
+        )}
+      </Box>
 
       <Snackbar
         open={snackbarOpen}
