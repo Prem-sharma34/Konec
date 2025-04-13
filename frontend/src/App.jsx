@@ -4,7 +4,7 @@ import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import VerifyEmail from "./pages/VerifyEmail";
 import ProtectedRoute from "./components/ProtectedRoute";
-import LandingPage from "./pages/landingPage";
+import LandingPage from "./pages/LandingPage";
 
 const App = () => {
   return (
