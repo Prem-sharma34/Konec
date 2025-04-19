@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth , GoogleAuthProvider , signInWithPopup } from "firebase/auth";
+import { getDatabase } from "firebase/database"; // Correct import for Realtime Database
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -14,9 +15,8 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
+const database = getDatabase(app); // Pass the app instance to getDatabase
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-
-export {auth, provider, signInWithPopup};
+export { database, auth, provider, signInWithPopup };

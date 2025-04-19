@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   Typography,
@@ -18,6 +18,10 @@ import {
 } from "@mui/material";
 import { Search, Clear } from "@mui/icons-material";
 import axiosInstance from "../utils/axiosInstance";
+// Import Firebase modules
+import { getDatabase, ref, onValue, off } from "firebase/database";
+import { database } from "../utils/firebaseConfig"; // Ensure this matches the updated export
+
 
 const FriendsList = ({ user, setSelectedFriend }) => {
   const [friends, setFriends] = useState([]);
@@ -26,9 +30,14 @@ const FriendsList = ({ user, setSelectedFriend }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [selectedFriendId, setSelectedFriendId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Keep track of active listeners to clean up
+  const activeListeners = useRef({});
 
   useEffect(() => {
     const fetchFriends = async () => {
+      if (!user?.id) return;
+      
       setLoading(true);
       setError(null);
       try {
@@ -48,6 +57,9 @@ const FriendsList = ({ user, setSelectedFriend }) => {
             unread_count: 0,
           }));
           setFriends(friendsWithChatInfo);
+          
+          // Set up listeners for each friend's chat
+          setupChatListeners(friendsWithChatInfo, user.id);
         } else {
           setFriends([]);
           setError("No friends found");
@@ -62,11 +74,118 @@ const FriendsList = ({ user, setSelectedFriend }) => {
     };
 
     fetchFriends();
+    
+    // Cleanup function to remove all listeners when component unmounts
+    return () => {
+      Object.values(activeListeners.current).forEach(listenerRef => {
+        if (listenerRef) {
+          off(listenerRef);
+        }
+      });
+      activeListeners.current = {};
+    };
   }, [user]);
+
+  // Set up real-time listeners for each friend's chat
+  const setupChatListeners = (friendsList, userId) => {
+    if (!friendsList || !userId) return;
+    
+    // Clean up any existing listeners first
+    Object.values(activeListeners.current).forEach(listenerRef => {
+      if (listenerRef) {
+        off(listenerRef);
+      }
+    });
+    activeListeners.current = {};
+    
+    // Set up listeners for each friend
+    friendsList.forEach(friend => {
+      const chatId = `chat_${
+        userId < friend.user_id ? userId : friend.user_id
+      }_${
+        userId < friend.user_id ? friend.user_id : userId
+      }`;
+      
+      // Listen for last message updates
+      const lastMessageRef = ref(database, `chats/${chatId}/last_message`);
+      onValue(lastMessageRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const lastMessageData = snapshot.val();
+          
+          // Update the friends state with the new last message
+          setFriends(prevFriends => 
+            prevFriends.map(f => {
+              if (f.user_id === friend.user_id) {
+                return {
+                  ...f,
+                  last_message: lastMessageData.message,
+                  last_message_timestamp: lastMessageData.timestamp,
+                };
+              }
+              return f;
+            })
+          );
+        }
+      }, (error) => {
+        console.error(`Error listening to last message for ${chatId}:`, error);
+      });
+      
+      // Store reference to clean up later
+      activeListeners.current[`last_message_${chatId}`] = lastMessageRef;
+      
+      // Listen for unread messages count
+      const unreadRef = ref(database, `unread/${userId}/${chatId}`);
+      onValue(unreadRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const unreadData = snapshot.val();
+          
+          // Update the friends state with the unread count
+          setFriends(prevFriends => 
+            prevFriends.map(f => {
+              if (f.user_id === friend.user_id) {
+                return {
+                  ...f,
+                  unread_count: unreadData.count || 0,
+                };
+              }
+              return f;
+            })
+          );
+        }
+      }, (error) => {
+        console.error(`Error listening to unread count for ${chatId}:`, error);
+      });
+      
+      // Store reference to clean up later
+      activeListeners.current[`unread_${chatId}`] = unreadRef;
+    });
+  };
 
   const handleFriendClick = (friend) => {
     setSelectedFriend(friend);
     setSelectedFriendId(friend.user_id);
+    
+    // Reset unread count when a friend is selected
+    if (user?.id) {
+      const chatId = `chat_${
+        user.id < friend.user_id ? user.id : friend.user_id
+      }_${
+        user.id < friend.user_id ? friend.user_id : user.id
+      }`;
+      
+      // Reset unread count in friends list UI
+      setFriends(prevFriends => 
+        prevFriends.map(f => {
+          if (f.user_id === friend.user_id) {
+            return {
+              ...f,
+              unread_count: 0,
+            };
+          }
+          return f;
+        })
+      );
+    }
   };
 
   const handleSnackbarClose = () => {
@@ -77,13 +196,23 @@ const FriendsList = ({ user, setSelectedFriend }) => {
     setSearchQuery("");
   };
 
+  // Sort friends by last message timestamp (most recent first)
+  const sortedFriends = [...friends].sort((a, b) => {
+    if (a.last_message_timestamp && b.last_message_timestamp) {
+      return b.last_message_timestamp - a.last_message_timestamp;
+    }
+    if (a.last_message_timestamp) return -1;
+    if (b.last_message_timestamp) return 1;
+    return 0;
+  });
+
   // Filter friends based on search query
   const filteredFriends = searchQuery
-    ? friends.filter(friend => 
+    ? sortedFriends.filter(friend => 
         friend.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         friend.username.toLowerCase().includes(searchQuery.toLowerCase())
       )
-    : friends;
+    : sortedFriends;
 
   return (
     <Box
@@ -156,7 +285,7 @@ const FriendsList = ({ user, setSelectedFriend }) => {
                 >
                   <ListItemAvatar>
                     <Badge
-                      color="primary"
+                      color="error"
                       badgeContent={friend.unread_count}
                       invisible={!friend.unread_count}
                     >

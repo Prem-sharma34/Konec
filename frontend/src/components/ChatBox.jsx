@@ -20,6 +20,10 @@ import {
   ArrowBack,
 } from "@mui/icons-material";
 import axiosInstance from "../utils/axiosInstance";
+// Import Firebase modules
+import { getDatabase, ref, onValue, off, update, remove } from "firebase/database";
+import {database} from "../utils/firebaseConfig";
+
 
 const ChatBox = ({ user, selectedFriend }) => {
   const [messages, setMessages] = useState([]);
@@ -36,6 +40,7 @@ const ChatBox = ({ user, selectedFriend }) => {
   
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
+  const messagesListenerRef = useRef(null);
 
   // Initialize or get existing chat
   useEffect(() => {
@@ -58,38 +63,76 @@ const ChatBox = ({ user, selectedFriend }) => {
     };
 
     initializeChat();
-  }, [user, selectedFriend]);
-
-  // Fetch messages when chatId is available
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (!chatId) return;
-      
-      setLoadingMessages(true);
-      try {
-        const response = await axiosInstance.get("/chat/get_messages", {
-          params: { chat_id: chatId }
-        });
-        
-        console.log("Messages fetched:", response.data);
-        setMessages(response.data.messages || []);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching messages:", err);
-        setError("Failed to load messages");
-        showSnackbar("Failed to load messages", "error");
-      } finally {
-        setLoadingMessages(false);
+    
+    // Cleanup function
+    return () => {
+      // Remove any existing listeners when component unmounts or chat changes
+      if (messagesListenerRef.current) {
+        off(messagesListenerRef.current);
+        messagesListenerRef.current = null;
       }
     };
+  }, [user, selectedFriend]);
 
-    fetchMessages();
-  }, [chatId]);
+  // Set up real-time listener for messages when chatId is available
+  useEffect(() => {
+    if (!chatId) return;
+    
+    setLoadingMessages(true);
+    
+    // Reference to the messages in this chat
+    const messagesRef = ref(database, `chats/${chatId}/messages`);
+    messagesListenerRef.current = messagesRef;
+    
+    // Set up real-time listener
+    const unsubscribe = onValue(messagesRef, (snapshot) => {
+      setLoadingMessages(false);
+      
+      if (!snapshot.exists()) {
+        setMessages([]);
+        return;
+      }
+      
+      const messagesData = snapshot.val();
+      const messagesArray = Object.entries(messagesData).map(([id, data]) => ({
+        message_id: id,
+        ...data
+      }));
+      
+      // Sort messages by timestamp
+      messagesArray.sort((a, b) => a.timestamp - b.timestamp);
+      setMessages(messagesArray);
+      
+      // Mark messages as read if the user is the recipient
+      if (user?.id) {
+        markMessagesAsRead(chatId, user.id);
+      }
+    }, (error) => {
+      console.error("Error listening to messages:", error);
+      setError("Failed to listen to messages");
+      showSnackbar("Failed to listen to messages", "error");
+      setLoadingMessages(false);
+    });
+    
+    // Cleanup function to remove the listener when component unmounts or chat changes
+    return () => {
+      off(messagesRef);
+    };
+  }, [chatId, user?.id]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Mark messages as read when user opens chat
+  const markMessagesAsRead = (chatId, userId) => {
+    if (!chatId || !userId) return;
+    
+    // Set unread counter to 0 for this chat
+    const unreadRef = ref(database, `unread/${userId}/${chatId}`);
+    update(unreadRef, { count: 0 });
+  };
 
   const handleSendMessage = async (e) => {
     e?.preventDefault();
@@ -104,22 +147,25 @@ const ChatBox = ({ user, selectedFriend }) => {
         message: newMessage.trim(),
       };
       
+      // Send message through API
       const response = await axiosInstance.post("/chat/send_message", messageData);
       console.log("Message sent:", response.data);
       
-      // Optimistically add message to UI
-      const tempMessage = {
-        message_id: response.data.message_id,
-        sender: user.id,
-        message: newMessage.trim(),
-        timestamp: Date.now(),
-      };
-      
-      setMessages([...messages, tempMessage]);
+      // Clear message input
       setNewMessage("");
       
-      // Fetch latest messages to ensure everything is in sync
-      refreshMessages();
+      // No need to update messages list manually since Firebase listener will handle it
+      
+      // Update unread count for recipient
+      const recipientId = selectedFriend.user_id;
+      const unreadRef = ref(database, `unread/${recipientId}/${chatId}`);
+      
+      // Get current count first, then increment
+      onValue(unreadRef, (snapshot) => {
+        const currentCount = snapshot.exists() ? snapshot.val().count || 0 : 0;
+        update(unreadRef, { count: currentCount + 1 });
+      }, { onlyOnce: true });
+      
     } catch (err) {
       console.error("Error sending message:", err);
       showSnackbar("Failed to send message", "error");
@@ -128,24 +174,11 @@ const ChatBox = ({ user, selectedFriend }) => {
     }
   };
 
-  const refreshMessages = async () => {
-    if (!chatId) return;
-    
-    try {
-      const response = await axiosInstance.get("/chat/get_messages", {
-        params: { chat_id: chatId }
-      });
-      
-      setMessages(response.data.messages || []);
-    } catch (err) {
-      console.error("Error refreshing messages:", err);
-    }
-  };
-
   const handleDeleteMessage = async (messageId) => {
     if (!chatId || !messageId) return;
     
     try {
+      // Delete message through API
       await axiosInstance.delete("/chat/delete_message", {
         data: {
           chat_id: chatId,
@@ -153,8 +186,7 @@ const ChatBox = ({ user, selectedFriend }) => {
         }
       });
       
-      // Remove message from UI
-      setMessages(messages.filter(msg => msg.message_id !== messageId));
+      // No need to update message list manually as Firebase listener will handle it
       showSnackbar("Message deleted", "success");
       handleCloseMenu();
     } catch (err) {
