@@ -18,11 +18,38 @@ import {
   Person as ProfileIcon,
   Notifications as NotificationsIcon,
 } from "@mui/icons-material";
+import { deepPurple } from "@mui/material/colors";
+import axiosInstance from "../utils/axiosInstance";
 
 const Navbar = ({ setActiveSection, activeSection, user }) => {
   const [userEmail, setUserEmail] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [profileData, setProfileData] = useState({
+    profile_pic: null,
+    display_name: "",
+  });
   const navigate = useNavigate();
+
+  // Get user details including correct profile pic from backend
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (!user) return;
+      
+      try {
+        const response = await axiosInstance.get("/profile/get");
+        if (response.data) {
+          setProfileData({
+            profile_pic: response.data.profilePic || response.data.profile_pic,
+            display_name: response.data.display_name || user.display_name
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile data:", error);
+      }
+    };
+
+    fetchProfileData();
+  }, [user]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -53,6 +80,15 @@ const Navbar = ({ setActiveSection, activeSection, user }) => {
     setAnchorEl(null);
   };
 
+  // Use the profile pic from our fetched profile data
+  const profilePic = profileData.profile_pic || 
+                    user?.profilePic || 
+                    user?.profile_pic;
+                    
+  const displayLetter = (profileData.display_name || user?.display_name || "")
+                        .charAt(0)
+                        .toUpperCase() || "U";
+
   return (
     <>
       {/* Top Bar */}
@@ -65,16 +101,22 @@ const Navbar = ({ setActiveSection, activeSection, user }) => {
 
           {/* Right Avatar */}
           <Avatar
+            src={profilePic || undefined}
             sx={{
               position: "absolute",
               right: 16,
-              bgcolor: "grey.300",
+              bgcolor: profilePic ? "transparent" : deepPurple[500],
+              color: "white",
+              fontWeight: "bold",
               cursor: "pointer",
+              width: 40,
+              height: 40,
             }}
             onClick={handleMenuOpen}
           >
-            {user?.display_name?.charAt(0) || "U"}
+            {!profilePic && displayLetter}
           </Avatar>
+
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
@@ -103,31 +145,11 @@ const Navbar = ({ setActiveSection, activeSection, user }) => {
           boxShadow: "0 -2px 5px rgba(0,0,0,0.1)",
         }}
       >
-        <BottomNavigationAction
-          label="Friends"
-          value="friends"
-          icon={<FriendsIcon />}
-        />
-        <BottomNavigationAction
-          label="Random"
-          value="random"
-          icon={<RandomIcon />}
-        />
-        <BottomNavigationAction
-          label="Search"
-          value="search"
-          icon={<SearchIcon />}
-        />
-        <BottomNavigationAction
-          label="Profile"
-          value="profile"
-          icon={<ProfileIcon />}
-        />
-        <BottomNavigationAction
-          label="Notifications"
-          value="notifications"
-          icon={<NotificationsIcon />}
-        />
+        <BottomNavigationAction label="Friends" value="friends" icon={<FriendsIcon />} />
+        <BottomNavigationAction label="Random" value="random" icon={<RandomIcon />} />
+        <BottomNavigationAction label="Search" value="search" icon={<SearchIcon />} />
+        <BottomNavigationAction label="Profile" value="profile" icon={<ProfileIcon />} />
+        <BottomNavigationAction label="Notifications" value="notifications" icon={<NotificationsIcon />} />
       </BottomNavigation>
     </>
   );
