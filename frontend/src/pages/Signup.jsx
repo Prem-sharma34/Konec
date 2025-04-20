@@ -66,6 +66,8 @@ const Signup = () => {
         email: res.data.email,
         username: res.data.username,
         displayName: formData.displayName,
+        id: res.data.uid, 
+        uid: res.data.uid 
       }));
 
       navigate("/verify-email");

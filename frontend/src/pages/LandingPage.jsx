@@ -32,6 +32,7 @@ const LandingPage = () => {
       if (storedUser && !storedUser.id && storedUser.uid) {
         // If we have uid but not id, copy uid to id
         storedUser.id = storedUser.uid;
+        localStorage.setItem("user", JSON.stringify(storedUser));
       }
       
       console.log("User set in LandingPage:", storedUser);
