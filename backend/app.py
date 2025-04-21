@@ -7,9 +7,11 @@ from routes.find_user import find_user_bp
 from routes.friends import friends_bp
 from routes.friendsList import friends_list_bp
 from routes.one_chat import one_chat_bp
+from routes.random import random_bp
 from flask_jwt_extended import JWTManager
 import os
 from dotenv import load_dotenv
+from socket_handler import init_socket
 
 # Load environment variables
 load_dotenv()
@@ -35,7 +37,6 @@ app.config["JWT_TOKEN_LOCATION"] = ["headers"]  # Ensures token is read from hea
 app.config["JWT_IDENTITY_CLAIM"] = "uid"
 
 
-
 jwt = JWTManager(app)
 
 
@@ -53,10 +54,12 @@ app.register_blueprint(profile_bp, url_prefix="/profile")
 app.register_blueprint(find_user_bp, url_prefix="/find_user")
 app.register_blueprint(friends_bp, url_prefix="/friends")
 app.register_blueprint(friends_list_bp, url_prefix="/friends_list")
-app.register_blueprint(one_chat_bp,url_prefix="/chat")
+app.register_blueprint(one_chat_bp, url_prefix="/chat")
+app.register_blueprint(random_bp, url_prefix="/random")
 
-
-
+# Initialize Socket.IO for random chat/call
+socketio = init_socket(app)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Use socketio.run instead of app.run to enable WebSocket support
+    socketio.run(app, debug=True, host='0.0.0.0', port=5001, allow_unsafe_werkzeug=True)

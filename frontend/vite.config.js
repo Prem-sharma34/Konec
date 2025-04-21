@@ -9,4 +9,11 @@ export default defineConfig({
       "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
     },
   },
+  resolve: {
+    alias: {
+      '@': '/src',
+      '@contexts': '/src/contexts',
+      '@components': '/src/components',
+    }
+  }
 });

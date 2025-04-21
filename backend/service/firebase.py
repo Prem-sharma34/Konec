@@ -5,8 +5,9 @@ from firebase_admin import credentials, firestore , db , auth
 # Loads the Firebase service account key from the Json file
 cred = credentials.Certificate("serviceAccountKey.json")
 #Initializes Firebase using the provided credentials.
+
 firebase_admin.initialize_app(cred , {
-    "databaseURL": "https://randomchat-c08b6-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    "databaseURL": "https://konec-28f03-default-rtdb.asia-southeast1.firebasedatabase.app/"
 })
 
 
@@ -17,6 +18,3 @@ firestore_db = firestore.client()
 realtime_db = db
 
 firebase_auth = auth
-
-
-
