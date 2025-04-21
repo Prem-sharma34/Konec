@@ -1,19 +1,20 @@
 import { useEffect, useState, useCallback } from "react";
-import { getDatabase, ref, set, remove, onValue, get, push, update } from "firebase/database";
+import { getDatabase, ref, set, remove, onValue } from "firebase/database";
 import { database } from "../utils/firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 
-const useRandomQueue = (user, onMatched) => {
+const useRandomQueue = () => {
   const [queueStatus, setQueueStatus] = useState("idle"); // idle | joining | waiting | matched | error
-  const [sessionId, setSessionId] = useState(null);
 
-  const joinQueue = useCallback(async () => {
-    if (!user?.id) return;
+  const joinQueue = async (user) => {
+    if (!user?.id) return null;
 
     try {
       setQueueStatus("joining");
-      const queueRef = ref(database, `random_queue/${user.id}`);
-      await set(queueRef, {
+
+      // Add user to the queue
+      const userQueueRef = ref(database, `random_queue/${user.id}`);
+      await set(userQueueRef, {
         timestamp: Date.now(),
         display_name: user.display_name,
         profile_pic: user.profile_pic || user.profilePic || "",
@@ -21,70 +22,79 @@ const useRandomQueue = (user, onMatched) => {
 
       setQueueStatus("waiting");
 
-      const queueRootRef = ref(database, "random_queue");
-      const unsubscribe = onValue(queueRootRef, async (snapshot) => {
-        const queueData = snapshot.val();
+      return new Promise((resolve, reject) => {
+        const queueRootRef = ref(database, "random_queue");
 
-        if (!queueData || Object.keys(queueData).length < 2) return;
+        const unsubscribe = onValue(queueRootRef, async (snapshot) => {
+          const queueData = snapshot.val();
 
-        const availableUsers = Object.keys(queueData).filter((uid) => uid !== user.id);
+          if (!queueData || Object.keys(queueData).length < 2) return;
 
-        if (availableUsers.length > 0) {
-          const partnerId = availableUsers[0];
-          const sessionRef = ref(database, `random_sessions`);
-          const sessionKey = uuidv4();
+          const availableUsers = Object.keys(queueData).filter((uid) => uid !== user.id);
 
-          const sessionData = {
-            users: [user.id, partnerId],
-            created_at: Date.now(),
-            ended: false,
-          };
+          if (availableUsers.length > 0) {
+            const partnerId = availableUsers[0];
+            const sessionKey = uuidv4();
 
-          await set(ref(database, `random_sessions/${sessionKey}`), sessionData);
+            const sessionData = {
+              users: [user.id, partnerId],
+              created_at: Date.now(),
+              ended: false,
+            };
 
-          await remove(ref(database, `random_queue/${user.id}`));
-          await remove(ref(database, `random_queue/${partnerId}`));
+            // Create session
+            await set(ref(database, `random_sessions/${sessionKey}`), sessionData);
 
-          setSessionId(sessionKey);
-          setQueueStatus("matched");
+            // Clean queue
+            await remove(ref(database, `random_queue/${user.id}`));
+            await remove(ref(database, `random_queue/${partnerId}`));
 
-          if (onMatched) {
-            onMatched(sessionKey, partnerId);
+            setQueueStatus("matched");
+
+            unsubscribe(); // Stop listening
+            resolve({ sessionId: sessionKey, partnerId });
           }
-
+        }, (error) => {
+          console.error("Firebase onValue error:", error);
           unsubscribe();
-        }
+          reject(error);
+        });
+
+        // Timeout after 30 seconds (optional)
+        setTimeout(() => {
+          unsubscribe();
+          remove(userQueueRef);
+          reject(new Error("Timeout finding a match."));
+        }, 30000);
       });
-
-      return () => unsubscribe();
     } catch (err) {
-      console.error("Error joining random queue:", err);
+      console.error("Error in joinQueue:", err);
       setQueueStatus("error");
+      return null;
     }
-  }, [user, onMatched]);
+  };
 
-  const leaveQueue = useCallback(async () => {
-    if (!user?.id) return;
+  const leaveQueue = useCallback(async (userId) => {
+    if (!userId) return;
     try {
-      await remove(ref(database, `random_queue/${user.id}`));
+      await remove(ref(database, `random_queue/${userId}`));
       setQueueStatus("idle");
     } catch (err) {
       console.error("Error leaving queue:", err);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    return () => {
-      leaveQueue(); // clean up on unmount
-    };
-  }, [leaveQueue]);
+    // Optional: global queue cleanup on unmount
+    return () => {};
+  }, []);
 
   return {
     joinQueue,
     leaveQueue,
     queueStatus,
-    sessionId,
   };
 };
 
 export default useRandomQueue;
+  

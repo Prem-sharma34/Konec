@@ -29,7 +29,7 @@ const RandomChatBox = ({ user, sessionId, otherUserId, onEnd }) => {
   useEffect(() => {
     const fetchOtherUser = async () => {
       try {
-        const res = await axiosInstance.get(`/profile/public/${otherUserId}`);
+        const res = await axiosInstance.get(`/random_chat/profile/public/${otherUserId}`);
         setOtherUser(res.data);
       } catch (err) {
         console.error("Failed to load user profile", err);

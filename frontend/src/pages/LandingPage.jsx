@@ -154,7 +154,7 @@ const LandingPage = () => {
         {activeSection === "search" && <FindUsers user={user} />}
         {activeSection === "profile" && <Profile user={user} />}
         {activeSection === "notifications" && <Notifications user={user} />}
-        {activeSection === "random" && <Random />}
+        {activeSection === "random" && <Random user={user}/>}
       </Box>
     </Box>
   );
