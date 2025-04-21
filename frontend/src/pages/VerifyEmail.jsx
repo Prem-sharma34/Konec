@@ -43,63 +43,79 @@ const VerifyEmail = () => {
   }, [uid, navigate]);
 
   return (
-    <Box 
-      sx={{ 
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'background.default',
-        py: 3
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundColor: "#000",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        px: 2,
       }}
     >
-      <Container maxWidth="sm">
-        <Paper 
-          elevation={4} 
-          sx={{ 
-            borderRadius: 3,
-            py: 5,
-            px: 4,
-            textAlign: 'center',
-            backgroundColor: 'background.paper'
-          }}
+      <Paper
+        elevation={4}
+        sx={{
+          width: "100%",
+          maxWidth: 480,
+          borderRadius: 3,
+          p: 4,
+          bgcolor: "#121212",
+          color: "#fff",
+          textAlign: "center",
+          boxShadow: "0 0 20px rgba(0, 255, 255, 0.1)",
+          backdropFilter: "blur(4px)",
+        }}
+      >
+        <EmailIcon sx={{ fontSize: 50, mb: 2, color: "#90caf9" }} />
+        <Typography
+          variant="h5"
+          fontWeight="500"
+          gutterBottom
+          sx={{ color: "#fff" }}
         >
-          <EmailIcon color="primary" sx={{ fontSize: 50, mb: 2 }} />
-          <Typography variant="h5" fontWeight={600} gutterBottom>
-            Verify Your Email
-          </Typography>
-          <Typography variant="body1" color="text.secondary" mb={3}>
-            We've sent a verification link to your email. Please check your inbox (and spam folder) to confirm your account.
-          </Typography>
-          
-          {message && (
-            <Alert severity={message.includes("not yet") ? "info" : "error"} sx={{ mb: 3 }}>
-              {message}
-            </Alert>
-          )}
-          
-          <Button 
-            variant="contained" 
-            fullWidth 
-            sx={{ py: 1.5, mb: 2 }} 
-            onClick={checkVerification} 
-            disabled={loading}
+          Verify Your Email
+        </Typography>
+        <Typography variant="body1" sx={{ color: "#bbb", mb: 3 }}>
+          We've sent a verification link to your email. Please check your inbox
+          (and spam folder) to confirm your account.
+        </Typography>
+
+        {message && (
+          <Alert
+            severity={message.includes("not yet") ? "info" : "error"}
+            sx={{ mb: 3 }}
           >
-            {loading ? <CircularProgress size={24} /> : "I’ve Verified My Email"}
-          </Button>
-          
-          <Typography variant="body2" color="text.secondary">
-            Didn’t receive the email? Check spam or {" "}
-            <Typography 
-              component="span" 
-              color="primary" 
-              sx={{ cursor: 'pointer', fontWeight: 500, '&:hover': { textDecoration: 'underline' } }}
-            >
-              resend it
-            </Typography>.
+            {message}
+          </Alert>
+        )}
+
+        <Button
+          variant="contained"
+          fullWidth
+          sx={{ py: 1.5, mb: 2 }}
+          onClick={checkVerification}
+          disabled={loading}
+        >
+          {loading ? <CircularProgress size={24} color="inherit" /> : "I’ve Verified My Email"}
+        </Button>
+
+        <Typography variant="body2" sx={{ color: "#bbb" }}>
+          Didn’t receive the email? Check spam or{" "}
+          <Typography
+            component="span"
+            sx={{
+              color: "#90caf9",
+              cursor: "pointer",
+              fontWeight: 500,
+              "&:hover": { textDecoration: "underline" },
+            }}
+          >
+            resend it
           </Typography>
-        </Paper>
-      </Container>
+          .
+        </Typography>
+      </Paper>
     </Box>
   );
 };

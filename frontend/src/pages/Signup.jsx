@@ -110,46 +110,85 @@ const Signup = () => {
   };
 
   return (
-    <Box 
-      sx={{ 
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        py: 3,
-        backgroundColor: 'background.default',
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        backgroundColor: "#000",
+        overflow: "hidden",
       }}
     >
-      <Container maxWidth="sm">
-        <Paper 
-          elevation={3} 
-          sx={{ 
-            borderRadius: 2,
-            py: 4,
-            px: { xs: 3, sm: 5 },
+      {/* Left background section */}
+      <Box
+        sx={{
+          flex: 1,
+          position: "relative",
+          display: { xs: "none", md: "block" },
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: 'url("/chat.png")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            zIndex: 1,
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to right, rgba(0,0,0,0.85), rgba(0,0,0,0.2))",
+            zIndex: 2,
+          }}
+        />
+      </Box>
+
+      {/* Right form section */}
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          px: 2,
+          backgroundColor: "#000",
+          zIndex: 3,
+        }}
+      >
+        <Paper
+          elevation={4}
+          sx={{
+            width: "100%",
+            maxWidth: 420,
+            borderRadius: 3,
+            p: 4,
+            bgcolor: "#121212",
+            color: "#fff",
+            boxShadow: "0 0 20px rgba(0, 255, 255, 0.1)",
+            backdropFilter: "blur(4px)",
           }}
         >
-          <Typography 
-            variant="h4" 
-            component="h1" 
-            align="center" 
-            fontWeight="500" 
+          <Typography
+            variant="h4"
+            component="h1"
+            align="center"
+            fontWeight="500"
             mb={4}
-            color="primary"
           >
             Sign Up
           </Typography>
-          
+
           {error && (
-            <Alert 
-              severity="error" 
-              sx={{ mb: 3 }}
-            >
+            <Alert severity="error" sx={{ mb: 3 }}>
               {error}
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          <Box component="form" onSubmit={handleSubmit}>
             <TextField
               margin="normal"
               required
@@ -160,6 +199,8 @@ const Signup = () => {
               onChange={handleChange}
               disabled={loading}
               autoFocus
+              InputLabelProps={{ style: { color: "#bbb" } }}
+              InputProps={{ style: { color: "#fff" } }}
             />
             <TextField
               margin="normal"
@@ -171,6 +212,8 @@ const Signup = () => {
               value={formData.email}
               onChange={handleChange}
               disabled={loading}
+              InputLabelProps={{ style: { color: "#bbb" } }}
+              InputProps={{ style: { color: "#fff" } }}
             />
             <TextField
               margin="normal"
@@ -183,7 +226,13 @@ const Signup = () => {
               onChange={handleChange}
               disabled={loading}
               helperText="Password must be at least 8 characters"
+              FormHelperTextProps={{
+                sx: { color: "#bbb" }
+              }}
+              InputLabelProps={{ style: { color: "#bbb" } }}
+              InputProps={{ style: { color: "#fff" } }}
             />
+
             <Button
               type="submit"
               fullWidth
@@ -191,42 +240,74 @@ const Signup = () => {
               sx={{ mt: 3, mb: 2, py: 1.5 }}
               disabled={loading}
             >
-              {loading ? <CircularProgress size={24} /> : "Sign Up"}
+              {loading ? <CircularProgress size={24} color="inherit" /> : "Sign Up"}
             </Button>
           </Box>
 
-          <Divider sx={{ my: 3 }}>or</Divider>
-          
+          <Divider
+  sx={{
+    my: 3,
+    display: "flex",
+    alignItems: "center",
+    textAlign: "center",
+    "&::before": {
+      content: '""',
+      flex: 1,
+      borderBottom: "1px solid #444", 
+      marginRight: "8px", 
+    },
+    "&::after": {
+      content: '""',
+      flex: 1,
+      borderBottom: "1px solid #444", 
+      marginLeft: "8px", 
+    },
+  }}
+>
+  or
+</Divider>
+
+
           <Button
             fullWidth
             variant="outlined"
-            startIcon={<GoogleIcon />}
             onClick={handleGoogleSignup}
             disabled={loading}
-            sx={{ py: 1.5 }}
+            sx={{
+              py: 1.5,
+              borderColor: "#888",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              '&:hover': { borderColor: "#fff" },
+            }}
           >
-            {loading ? <CircularProgress size={24} /> : "Sign Up with Google"}
+            {loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              <>
+                <Box
+                  component="img"
+                  src="/google-logo.png"
+                  alt="Google logo"
+                  sx={{ width: 20, height: 20, mr: 1 }}
+                />
+                Sign Up with Google
+              </>
+            )}
           </Button>
-          
+
           <Box mt={3} textAlign="center">
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{ color: "#bbb" }}>
               Already have an account?{" "}
-              <Link to="/login" style={{ textDecoration: 'none' }}>
-                <Typography 
-                  component="span" 
-                  color="primary"
-                  sx={{ 
-                    fontWeight: 500,
-                    '&:hover': { textDecoration: 'underline' } 
-                  }}
-                >
-                  Login here
-                </Typography>
+              <Link to="/login" style={{ textDecoration: "none", color: "#90caf9" }}>
+                Login here
               </Link>
             </Typography>
           </Box>
         </Paper>
-      </Container>
+      </Box>
     </Box>
   );
 };
