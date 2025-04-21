@@ -4,13 +4,23 @@ import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDKKHLJmr6LEYKF6C8-EUgNXzldVQpQMbc",
-  authDomain: "randomchat-c08b6.firebaseapp.com",
-  databaseURL: "https://randomchat-c08b6-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "randomchat-c08b6",
-  storageBucket: "randomchat-c08b6.firebasestorage.app",
-  messagingSenderId: "158865023370",
-  appId: "1:158865023370:web:8aabbc75b84619f0e12873"
+
+  apiKey: "AIzaSyBtwPtosFDqG2JeN_P9GU8vTGrTXoDzjgA",
+
+  authDomain: "konec-28f03.firebaseapp.com",
+
+  databaseURL: "https://konec-28f03-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+  projectId: "konec-28f03",
+
+  storageBucket: "konec-28f03.firebasestorage.app",
+
+  messagingSenderId: "522343124304",
+
+  appId: "1:522343124304:web:d58fc8177038e703a27055",
+
+  measurementId: "G-P0X95B9KS0"
+
 };
 
 // Initialize Firebase
