@@ -7,6 +7,7 @@ from routes.find_user import find_user_bp
 from routes.friends import friends_bp
 from routes.friendsList import friends_list_bp
 from routes.one_chat import one_chat_bp
+from routes.random_chat import random_chat_bp
 from flask_jwt_extended import JWTManager
 import os
 from dotenv import load_dotenv
@@ -54,6 +55,7 @@ app.register_blueprint(find_user_bp, url_prefix="/find_user")
 app.register_blueprint(friends_bp, url_prefix="/friends")
 app.register_blueprint(friends_list_bp, url_prefix="/friends_list")
 app.register_blueprint(one_chat_bp,url_prefix="/chat")
+app.register_blueprint(random_chat_bp,url_prefix="/random_chat")
 
 
 
