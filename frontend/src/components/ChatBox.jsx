@@ -221,7 +221,7 @@ const ChatBox = ({ user, selectedFriend }) => {
 
   if (!selectedFriend) {
     return (
-      <Box sx={{ textAlign: "center", mt: 4 }}>
+      <Box sx={{ textAlign: "center", mt: 4, color: "#f8fafc" }}>
         <Typography>Select a friend to start chatting</Typography>
       </Box>
     );
@@ -235,23 +235,28 @@ const ChatBox = ({ user, selectedFriend }) => {
       width: "100%", 
       maxWidth: 800, 
       mx: "auto", 
-      bgcolor: "white",
+      bgcolor: "#1c1c1c",
       borderRadius: 2,
-      boxShadow: 1,
+      boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+      border: "1px solid rgba(255,255,255,0.08)",
       overflow: "hidden"
     }}>
       {/* Chat Header */}
       <Box sx={{ 
         p: 2, 
-        borderBottom: "1px solid #eee", 
+        borderBottom: "1px solid #333", 
         display: "flex", 
         alignItems: "center",
-        bgcolor: "primary.main",
+        bgcolor: "#141414",
         color: "white" 
       }}>
         <Avatar 
           src={selectedFriend.profile_pic} 
-          sx={{ mr: 2 }}
+          sx={{ 
+            mr: 2,
+            border: "2px solid #E50914",
+            boxShadow: "0 2px 8px rgba(229,9,20,0.4)"
+          }}
         >
           {selectedFriend.display_name?.charAt(0) || "U"}
         </Avatar>
@@ -269,11 +274,11 @@ const ChatBox = ({ user, selectedFriend }) => {
           overflowY: "auto",
           display: "flex",
           flexDirection: "column",
-          bgcolor: "#f5f5f5"
+          bgcolor: "#0f0f0f"
         }}
       >
         {loadingMessages ? (
-          <CircularProgress sx={{ alignSelf: "center", my: 4 }} />
+          <CircularProgress sx={{ alignSelf: "center", my: 4, color: "#E50914" }} />
         ) : messages.length > 0 ? (
           messages.map((message) => {
             const isCurrentUser = message.sender === user.id;
@@ -302,14 +307,14 @@ const ChatBox = ({ user, selectedFriend }) => {
                     p: 1.5,
                     borderRadius: 2,
                     maxWidth: "70%",
-                    bgcolor: isCurrentUser ? "primary.light" : "white",
-                    color: isCurrentUser ? "primary.contrastText" : "text.primary",
+                    bgcolor: isCurrentUser ? "#E50914" : "#2B2B3C",
+                    color: "white",
                     position: "relative",
                     wordBreak: "break-word",
                     cursor: isCurrentUser ? "pointer" : "default",
                     "&:hover": isCurrentUser 
                       ? { 
-                          bgcolor: "primary.main",
+                          bgcolor: "#C7081C",
                           "& .message-options": { display: "flex" }
                         } 
                       : {}
@@ -323,7 +328,7 @@ const ChatBox = ({ user, selectedFriend }) => {
                       display: "block",
                       mt: 0.5,
                       textAlign: "right",
-                      color: isCurrentUser ? "rgba(255,255,255,0.7)" : "text.secondary",
+                      color: isCurrentUser ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.5)",
                     }}
                   >
                     {formatTimestamp(message.timestamp)}
@@ -336,7 +341,7 @@ const ChatBox = ({ user, selectedFriend }) => {
           <Typography
             sx={{
               textAlign: "center",
-              color: "text.secondary",
+              color: "#aaa",
               mt: 4,
             }}
           >
@@ -352,10 +357,10 @@ const ChatBox = ({ user, selectedFriend }) => {
         onSubmit={handleSendMessage}
         sx={{
           p: 2,
-          borderTop: "1px solid #eee",
+          borderTop: "1px solid #333",
           display: "flex",
           alignItems: "center",
-          bgcolor: "white",
+          bgcolor: "#141414",
         }}
       >
         <TextField
@@ -369,6 +374,21 @@ const ChatBox = ({ user, selectedFriend }) => {
             mr: 1,
             "& .MuiOutlinedInput-root": {
               borderRadius: 4,
+              backgroundColor: "#2B2B3C",
+              color: "white",
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#E50914",
+              },
+            },
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#444",
+            },
+            "& .MuiInputBase-input": {
+              color: "white",
+              "&::placeholder": {
+                color: "#aaa",
+                opacity: 1,
+              },
             },
           }}
         />
@@ -377,14 +397,14 @@ const ChatBox = ({ user, selectedFriend }) => {
           onClick={handleSendMessage}
           disabled={loading || !newMessage.trim() || !chatId}
           sx={{
-            bgcolor: "primary.main",
+            bgcolor: "#E50914",
             color: "white",
             "&:hover": {
-              bgcolor: "primary.dark",
+              bgcolor: "#C7081C",
             },
             "&.Mui-disabled": {
-              bgcolor: "grey.300",
-              color: "grey.500",
+              bgcolor: "#444",
+              color: "#777",
             },
           }}
         >
@@ -397,9 +417,17 @@ const ChatBox = ({ user, selectedFriend }) => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleCloseMenu}
+        PaperProps={{
+          sx: {
+            bgcolor: "#1a1a1a",
+            color: "white",
+            border: "1px solid #333",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.8)",
+          },
+        }}
       >
         <MenuItem onClick={() => handleDeleteMessage(selectedMessage?.message_id)}>
-          <Delete fontSize="small" sx={{ mr: 1 }} />
+          <Delete fontSize="small" sx={{ mr: 1, color: "#E50914" }} />
           Delete
         </MenuItem>
       </Menu>
@@ -414,7 +442,14 @@ const ChatBox = ({ user, selectedFriend }) => {
         <Alert 
           onClose={() => setSnackbarOpen(false)} 
           severity={snackbarSeverity}
-          sx={{ width: "100%" }}
+          sx={{ 
+            width: "100%", 
+            bgcolor: "#2B2B3C", 
+            color: "white",
+            "& .MuiAlert-icon": {
+              color: snackbarSeverity === "error" ? "#E50914" : "#00FFD1",
+            }
+          }}
         >
           {snackbarMessage}
         </Alert>

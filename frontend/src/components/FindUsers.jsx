@@ -118,16 +118,27 @@ const FindUsers = ({ user }) => {
     return (
       <Box
         sx={{
-          p: 2,
-          bgcolor: "white",
-          borderRadius: 2,
-          boxShadow: 1,
+          p: 4,
+          my: 4,
+          bgcolor: "rgba(30,30,47,0.85)",
+          backdropFilter: "blur(12px)",
+          color: "#fff",
+          borderRadius: 3,
           width: "100%",
           maxWidth: 600,
           mx: "auto",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+          border: "1px solid rgba(255,255,255,0.08)",
         }}
       >
-        <Alert severity="warning">
+        <Alert severity="warning" sx={{
+          bgcolor: "#2B2B3C",
+          color: "white",
+          border: "1px solid #E50914",
+          "& .MuiAlert-icon": {
+            color: "#E50914"
+          }
+        }}>
           You need to be logged in to search for friends. Please log out and log back in.
         </Alert>
       </Box>
@@ -137,20 +148,24 @@ const FindUsers = ({ user }) => {
   return (
     <Box
       sx={{
-        p: 2,
-        bgcolor: "white",
-        borderRadius: 2,
-        boxShadow: 1,
+        p: 4,
+        my: 4,
+        bgcolor: "rgba(30,30,47,0.85)",
+        backdropFilter: "blur(12px)",
+        color: "#fff",
+        borderRadius: 3,
         width: "100%",
         maxWidth: 600,
         mx: "auto",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+        border: "1px solid rgba(255,255,255,0.08)",
       }}
     >
-      <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
+      <Typography variant="h6" sx={{ mb: 3, textAlign: "center", fontWeight: 500 }}>
         Find Friends
       </Typography>
 
-      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
         <TextField
           label="Search by username or display name"
           value={search}
@@ -158,30 +173,63 @@ const FindUsers = ({ user }) => {
           fullWidth
           variant="outlined"
           disabled={loading}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              backgroundColor: "#2B2B3C",
+              color: "white",
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#E50914",
+              },
+            },
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#444",
+            },
+            "& .MuiInputBase-input": {
+              color: "white",
+            },
+            "& .MuiInputLabel-root": {
+              color: "#aaa",
+            },
+            "& .MuiInputLabel-root.Mui-focused": {
+              color: "#E50914",
+            },
+          }}
         />
         <Button
           variant="contained"
-          color="primary"
           onClick={handleSearch}
           disabled={loading}
+          sx={{
+            bgcolor: "#E50914",
+            color: "white",
+            fontWeight: 500,
+            "&:hover": {
+              bgcolor: "#C7081C",
+            },
+            "&.Mui-disabled": {
+              bgcolor: "#444",
+              color: "#777",
+            },
+          }}
         >
-          {loading ? <CircularProgress size={24} /> : "Search"}
+          {loading ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Search"}
         </Button>
       </Box>
 
       {error && (
-        <Typography color="error" sx={{ mb: 2, textAlign: "center" }}>
+        <Typography color="#E50914" sx={{ mb: 2, textAlign: "center" }}>
           {error}
         </Typography>
       )}
       {message && (
-        <Typography color="success.main" sx={{ mb: 2, textAlign: "center" }}>
+        <Typography color="#00FFD1" sx={{ mb: 2, textAlign: "center" }}>
           {message}
         </Typography>
       )}
 
       {users.length > 0 ? (
-        <List>
+        <List sx={{ bgcolor: "#1c1c1c", borderRadius: 2, p: 1 }}>
           {users.map((u) => (
             <ListItem
               key={u.id}
@@ -190,26 +238,51 @@ const FindUsers = ({ user }) => {
                   edge="end"
                   onClick={() => sendFriendRequest(u.id)}
                   disabled={loading || (currentUser?.id && u.id === currentUser.id)}
+                  sx={{
+                    color: "#E50914",
+                    "&:hover": {
+                      bgcolor: "rgba(229,9,20,0.1)",
+                    },
+                    "&.Mui-disabled": {
+                      color: "#555",
+                    },
+                  }}
                 >
-                  <PersonAdd color="primary" />
+                  <PersonAdd />
                 </IconButton>
               }
+              sx={{
+                borderRadius: 1,
+                mb: 0.5,
+                "&:hover": {
+                  bgcolor: "rgba(255,255,255,0.05)",
+                },
+              }}
             >
               <ListItemAvatar>
-                <Avatar src={u.profilePic} alt={u.display_name}>
+                <Avatar 
+                  src={u.profilePic} 
+                  alt={u.display_name}
+                  sx={{
+                    border: "2px solid #E50914",
+                    boxShadow: "0 2px 8px rgba(229,9,20,0.4)"
+                  }}
+                >
                   {u.display_name?.charAt(0) || "U"}
                 </Avatar>
               </ListItemAvatar>
               <ListItemText
                 primary={u.display_name}
                 secondary={`@${u.username}`}
+                primaryTypographyProps={{ color: "white" }}
+                secondaryTypographyProps={{ color: "#aaa" }}
               />
             </ListItem>
           ))}
         </List>
       ) : (
         !loading && !message && (
-          <Typography color="textSecondary" sx={{ textAlign: "center" }}>
+          <Typography color="#aaa" sx={{ textAlign: "center" }}>
             No users to display
           </Typography>
         )

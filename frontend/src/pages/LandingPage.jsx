@@ -65,71 +65,95 @@ const LandingPage = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        bgcolor: "#000", // Netflix-black background
+      }}
+    >
       <CssBaseline />
-      {/* Top Bar */}
-      <Navbar setActiveSection={setActiveSection} activeSection={activeSection} user={user} />
+      <Navbar
+        setActiveSection={setActiveSection}
+        activeSection={activeSection}
+        user={user}
+      />
 
-      {/* Main Content Area */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 2,
-          bgcolor: "grey.100",
+          bgcolor: "#0f0f0f", // Slightly lighter than pure black
           overflowY: "auto",
         }}
       >
         {activeSection === "friends" && (
-          <Box sx={{ 
-            display: "flex", 
-            flexDirection: isMobile ? "column" : "row",
-            gap: 2,
-            height: "calc(100vh - 120px)",
-          }}>
-            {/* Friends List (Left Side) */}
-            <Box sx={{ 
-              width: isMobile ? "100%" : "30%", 
-              minWidth: isMobile ? "auto" : "300px",
-              display: (isMobile && selectedFriend && activeSection === "chat") ? "none" : "block"
-            }}>
-              <FriendsList user={user} setSelectedFriend={handleFriendSelection} />
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              gap: 2,
+              height: "calc(100vh - 160px)",
+            }}
+          >
+            <Box
+              sx={{
+                width: isMobile ? "100%" : "30%",
+                minWidth: isMobile ? "auto" : "300px",
+                display:
+                  isMobile && selectedFriend && activeSection === "chat"
+                    ? "none"
+                    : "block",
+              }}
+            >
+              <FriendsList
+                user={user}
+                setSelectedFriend={handleFriendSelection}
+              />
             </Box>
-            
-            {/* Chat Area (Right Side) */}
-            <Box sx={{ 
-              width: isMobile ? "100%" : "70%",
-              display: (isMobile && !selectedFriend && activeSection !== "chat") ? "none" : "block",
-              flexGrow: 1
-            }}>
+
+            <Box
+              sx={{
+                width: isMobile ? "100%" : "70%",
+                display:
+                  isMobile && !selectedFriend && activeSection !== "chat"
+                    ? "none"
+                    : "block",
+                flexGrow: 1,
+              }}
+            >
               {selectedFriend ? (
-                <ChatBox 
-                  user={user} 
-                  selectedFriend={selectedFriend} 
+                <ChatBox
+                  user={user}
+                  selectedFriend={selectedFriend}
                   onBack={isMobile ? handleBackToFriends : undefined}
                 />
               ) : (
-                <Box 
-                  sx={{ 
-                    height: "100%", 
-                    display: "flex", 
+                <Box
+                  sx={{
+                    height: "100%",
+                    display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    bgcolor: "white",
-                    borderRadius: 2,
-                    boxShadow: 1,
+                    bgcolor: "#1c1c1c", // Dark panel background
+                    borderRadius: 3,
+                    boxShadow: "0 0 15px rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "rgba(255,255,255,0.5)",
                   }}
                 >
                   <Box sx={{ textAlign: "center", p: 4 }}>
-                    <img 
-                      src="/api/placeholder/200/200" 
-                      alt="Select a chat" 
-                      style={{ 
-                        opacity: 0.5, 
-                        maxWidth: '100%',
-                        borderRadius: '50%',
-                        marginBottom: '16px'
-                      }} 
+                    <img
+                      src="/api/placeholder/200/200"
+                      alt="Select a chat"
+                      style={{
+                        opacity: 0.3,
+                        maxWidth: "100%",
+                        borderRadius: "50%",
+                        marginBottom: "16px",
+                      }}
                     />
                     <p>Select a friend to start chatting</p>
                   </Box>
@@ -138,19 +162,29 @@ const LandingPage = () => {
             </Box>
           </Box>
         )}
-        
+
         {activeSection === "chat" && (
-          <Box sx={{ display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              height: "calc(100vh - 160px)",
+            }}
+          >
             {selectedFriend ? (
-              <ChatBox user={user} selectedFriend={selectedFriend} onBack={isMobile ? handleBackToFriends : undefined} />
+              <ChatBox
+                user={user}
+                selectedFriend={selectedFriend}
+                onBack={isMobile ? handleBackToFriends : undefined}
+              />
             ) : (
-              <Box sx={{ textAlign: "center", mt: 4 }}>
+              <Box sx={{ textAlign: "center", mt: 4, color: "#f8fafc" }}>
                 <p>Select a friend to start chatting.</p>
               </Box>
             )}
           </Box>
         )}
-        
+
         {activeSection === "search" && <FindUsers user={user} />}
         {activeSection === "profile" && <Profile user={user} />}
         {activeSection === "notifications" && <Notifications user={user} />}
