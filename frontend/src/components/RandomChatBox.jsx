@@ -4,6 +4,7 @@ import { getAuth } from "firebase/auth";
 import { database } from "../utils/firebaseConfig";
 import axios from "../utils/axiosInstance";
 import ChatBox from "./ChatBox";
+import { Box, Typography, CircularProgress } from "@mui/material";
 
 const RandomChatBox = ({ user, onExit }) => {
   const [selectedFriend, setSelectedFriend] = useState(null);
@@ -64,13 +65,33 @@ const RandomChatBox = ({ user, onExit }) => {
   }, []);
 
   if (loading || !selectedFriend) {
-    return <div style={{ textAlign: "center", paddingTop: 100 }}>Matching you with someone...</div>;
+    return (
+      <Box 
+        sx={{ 
+          display: "flex", 
+          flexDirection: "column", 
+          alignItems: "center", 
+          justifyContent: "center", 
+          minHeight: "50vh",
+          color: "#fff",
+          p: 4
+        }}
+      >
+        <CircularProgress sx={{ color: "#E50914", mb: 3 }} />
+        <Typography variant="h6" sx={{ fontWeight: 500 }}>
+          Matching you with someone...
+        </Typography>
+        <Typography variant="body2" sx={{ color: "#ccc", mt: 1 }}>
+          Please wait while we find you a random chat partner
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <div style={{ position: "relative" }}>
+    <Box sx={{ position: "relative" }}>
       <ChatBox user={user} selectedFriend={selectedFriend} isRandomChat onExit={onExit} />
-    </div>
+    </Box>
   );
 };
 

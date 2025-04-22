@@ -10,6 +10,7 @@ import {
   MenuItem,
   BottomNavigation,
   BottomNavigationAction,
+  Box,
 } from "@mui/material";
 import {
   People as FriendsIcon,
@@ -89,70 +90,122 @@ const Navbar = ({ setActiveSection, activeSection, user }) => {
                         .charAt(0)
                         .toUpperCase() || "U";
 
-  return (
-    <>
-      {/* Top Bar */}
-      <AppBar position="static" sx={{ bgcolor: "white", color: "black", boxShadow: 1 }}>
-        <Toolbar sx={{ justifyContent: "center" }}>
-          {/* Centered Logo */}
-          <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }}>
-            Konec
-          </Typography>
-
-          {/* Right Avatar */}
-          <Avatar
-            src={profilePic || undefined}
-            sx={{
-              position: "absolute",
-              right: 16,
-              bgcolor: profilePic ? "transparent" : deepPurple[500],
-              color: "white",
-              fontWeight: "bold",
-              cursor: "pointer",
-              width: 40,
-              height: 40,
-            }}
-            onClick={handleMenuOpen}
-          >
-            {!profilePic && displayLetter}
-          </Avatar>
-
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            transformOrigin={{ vertical: "top", horizontal: "right" }}
-          >
-            <MenuItem disabled>{userEmail || "User"}</MenuItem>
-            <MenuItem onClick={handleLogout}>Logout</MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
-
-      {/* Bottom Navigation */}
-      <BottomNavigation
-        showLabels
-        value={activeSection}
-        onChange={(event, newValue) => {
-          setActiveSection(newValue);
-        }}
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          width: "100%",
-          bgcolor: "white",
-          boxShadow: "0 -2px 5px rgba(0,0,0,0.1)",
-        }}
-      >
-        <BottomNavigationAction label="Friends" value="friends" icon={<FriendsIcon />} />
-        <BottomNavigationAction label="Random" value="random" icon={<RandomIcon />} />
-        <BottomNavigationAction label="Search" value="search" icon={<SearchIcon />} />
-        <BottomNavigationAction label="Profile" value="profile" icon={<ProfileIcon />} />
-        <BottomNavigationAction label="Notifications" value="notifications" icon={<NotificationsIcon />} />
-      </BottomNavigation>
-    </>
-  );
-};
-
-export default Navbar;
+                        return (
+                          <>
+                            {/* Top App Bar */}
+                            <AppBar
+                              position="static"
+                              sx={{
+                                bgcolor: "#141414",
+                                boxShadow: "0 2px 10px rgba(0,0,0,0.8)",
+                              }}
+                            >
+                              <Toolbar
+                                sx={{
+                                  justifyContent: "space-between",
+                                  px: 2,
+                                }}
+                              >
+                                <Typography
+                                  variant="h5"
+                                  sx={{
+                                    fontWeight: "bold",
+                                    color: "white",
+                                    fontFamily: "Netflix Sans, Helvetica Neue, Segoe UI, Roboto, Ubuntu, sans-serif",
+                                    letterSpacing: 1,
+                                  }}
+                                >
+                                  Konec
+                                </Typography>
+                      
+                                <Box>
+                                  <Avatar
+                                    src={profilePic || undefined}
+                                    onClick={handleMenuOpen}
+                                    sx={{
+                                      bgcolor: profilePic ? "transparent" : deepPurple[700],
+                                      color: "white",
+                                      cursor: "pointer",
+                                      width: 44,
+                                      height: 44,
+                                      border: "2px solid white",
+                                      boxShadow: "0 0 8px rgba(255, 255, 255, 0.3)",
+                                    }}
+                                  >
+                                    {!profilePic && displayLetter}
+                                  </Avatar>
+                      
+                                  <Menu
+                                    anchorEl={anchorEl}
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleMenuClose}
+                                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                                    transformOrigin={{ vertical: "top", horizontal: "right" }}
+                                    PaperProps={{
+                                      sx: {
+                                        bgcolor: "#1a1a1a",
+                                        color: "white",
+                                        border: "1px solid #333",
+                                        mt: 1,
+                                      },
+                                    }}
+                                  >
+                                    <MenuItem disabled>{userEmail || "User"}</MenuItem>
+                                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                                  </Menu>
+                                </Box>
+                              </Toolbar>
+                            </AppBar>
+                      
+                            {/* Bottom Navigation Bar */}
+                            <BottomNavigation
+                              showLabels
+                              value={activeSection}
+                              onChange={(event, newValue) => {
+                                setActiveSection(newValue);
+                              }}
+                              sx={{
+                                position: "fixed",
+                                bottom: 0,
+                                width: "100%",
+                                bgcolor: "#141414",
+                                borderTop: "1px solid #333",
+                                boxShadow: "0 -2px 10px rgba(0,0,0,0.8)",
+                              }}
+                            >
+                              <BottomNavigationAction
+                                label="Friends"
+                                value="friends"
+                                icon={<FriendsIcon />}
+                                sx={{ color: activeSection === "friends" ? "#E50914" : "#aaa" }}
+                              />
+                              <BottomNavigationAction
+                                label="Random"
+                                value="random"
+                                icon={<RandomIcon />}
+                                sx={{ color: activeSection === "random" ? "#E50914" : "#aaa" }}
+                              />
+                              <BottomNavigationAction
+                                label="Search"
+                                value="search"
+                                icon={<SearchIcon />}
+                                sx={{ color: activeSection === "search" ? "#E50914" : "#aaa" }}
+                              />
+                              <BottomNavigationAction
+                                label="Profile"
+                                value="profile"
+                                icon={<ProfileIcon />}
+                                sx={{ color: activeSection === "profile" ? "#E50914" : "#aaa" }}
+                              />
+                              <BottomNavigationAction
+                                label="Notifications"
+                                value="notifications"
+                                icon={<NotificationsIcon />}
+                                sx={{ color: activeSection === "notifications" ? "#E50914" : "#aaa" }}
+                              />
+                            </BottomNavigation>
+                          </>
+                        );
+                      };
+                      
+                      export default Navbar;

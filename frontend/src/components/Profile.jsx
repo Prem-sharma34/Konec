@@ -7,8 +7,15 @@ import {
   Button,
   IconButton,
   CircularProgress,
+  Snackbar,
 } from "@mui/material";
-import { Visibility, VisibilityOff, ContentCopy, CameraAlt } from "@mui/icons-material";
+import {
+  Visibility,
+  VisibilityOff,
+  ContentCopy,
+  CameraAlt,
+  Close,
+} from "@mui/icons-material";
 import axiosInstance from "../utils/axiosInstance";
 
 const Profile = () => {
@@ -93,172 +100,226 @@ const Profile = () => {
   return (
     <Box
       sx={{
-        p: 2,
-        bgcolor: "white",
-        borderRadius: 2,
-        boxShadow: 1,
-        width: "100%",
-        maxWidth: 600,
-        textAlign: "center",
-        mx: "auto",
+        display: "flex",
+        flexDirection: "column",
+        height: "calc(100vh - 160px)", // Match other sections' height
+        overflow: "auto", // Add scrolling for content
+        pb: 8, // Add padding to the bottom for the fixed navigation
       }}
     >
-      {loading && <CircularProgress sx={{ mb: 2 }} />}
-      {error && (
-        <Typography color="error" sx={{ mb: 2 }}>
-          {error}
-        </Typography>
-      )}
-      {message && (
-        <Typography color="success.main" sx={{ mb: 2 }}>
-          {message}
-        </Typography>
-      )}
+      <Box
+        sx={{
+          p: 4,
+          mt: 2, // Reduced from mt: 8 to mt: 2
+          mb: 4, // Add margin bottom
+          bgcolor: "rgba(30,30,47,0.85)",
+          backdropFilter: "blur(12px)",
+          color: "#fff",
+          borderRadius: 4,
+          width: "100%",
+          maxWidth: 600,
+          mx: "auto",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          fontFamily: "'Inter', 'Roboto', sans-serif",
+        }}
+      >
+        {loading && <CircularProgress sx={{ mb: 2, color: "#00FFD1" }} />}
+        {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
 
-      {/* Avatar */}
-      <Box sx={{ position: "relative", width: 128, height: 128, mx: "auto", mb: 2 }}>
-        <Avatar
-          src={profileData.profilePic || ""}
-          alt="Profile"
+        {/* Snackbar */}
+        <Snackbar
+          open={!!message}
+          autoHideDuration={3000}
+          onClose={() => setMessage("")}
+          message={message}
+          action={
+            <IconButton size="small" onClick={() => setMessage("")} sx={{ color: "#fff" }}>
+              <Close fontSize="small" />
+            </IconButton>
+          }
+          sx={{ "& .MuiSnackbarContent-root": { backgroundColor: "#333", color: "#00FFD1" } }}
+        />
+
+        {/* Avatar and Info */}
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 3 }}>
+          <Box sx={{ position: "relative", width: 120, height: 120 }}>
+            <Avatar
+              src={profileData.profilePic}
+              alt="Profile"
+              sx={{
+                width: "100%",
+                height: "100%",
+                border: "3px solid #00FFD1",
+                boxShadow: "0 0 12px rgba(0,255,209,0.4)",
+              }}
+            >
+              {profileData.display_name?.charAt(0)?.toUpperCase() || "U"}
+            </Avatar>
+            {isEditing && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  bgcolor: "rgba(0,0,0,0.3)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <CameraAlt sx={{ color: "#fff" }} />
+              </Box>
+            )}
+          </Box>
+
+          <Typography variant="h6" sx={{ fontWeight: 500, mt: 2 }}>
+            {profileData.display_name}
+          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography sx={{ color: "#ccc" }}>@{profileData.username}</Typography>
+            <IconButton onClick={copyUsername} size="small">
+              <ContentCopy sx={{ fontSize: 18, color: "#00FFD1" }} />
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* Email */}
+        <TextField
+          label="Email"
+          value={profileData.email}
+          fullWidth
+          margin="normal"
+          InputProps={{ readOnly: true }}
+          variant="filled"
           sx={{
-            width: "100%",
-            height: "100%",
-            border: "4px solid",
-            borderColor: "primary.main",
-            boxShadow: 1,
-            transition: "transform 0.3s",
-            "&:hover": { transform: "scale(1.1)" },
+            input: { color: "#fff" },
+            label: { color: "#aaa" },
+            backgroundColor: "#2B2B3C",
+            borderRadius: 2,
+            mb: 2,
           }}
-        >
-          {profileData.display_name?.charAt(0) || "U"}
-        </Avatar>
-        {isEditing && (
-          <Box
-            sx={{
-              position: "absolute",
-              inset: 0,
-              bgcolor: "rgba(0,0,0,0.5)",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: 0,
-              transition: "opacity 0.3s",
-              "&:hover": { opacity: 1 },
-            }}
-          >
-            <CameraAlt sx={{ color: "white" }} />
+        />
+
+        {/* Editable Fields */}
+        {isEditing ? (
+          <>
+            <TextField
+              label="Display Name"
+              name="display_name"
+              value={editData.display_name}
+              onChange={handleEditChange}
+              fullWidth
+              margin="normal"
+              variant="filled"
+              sx={{
+                input: { color: "#fff" },
+                label: { color: "#aaa" },
+                backgroundColor: "#2B2B3C",
+                borderRadius: 2,
+              }}
+            />
+            <TextField
+              label="Profile Picture URL"
+              name="profilePic"
+              value={editData.profilePic}
+              onChange={handleEditChange}
+              fullWidth
+              margin="normal"
+              variant="filled"
+              sx={{
+                input: { color: "#fff" },
+                label: { color: "#aaa" },
+                backgroundColor: "#2B2B3C",
+                borderRadius: 2,
+              }}
+            />
+            <TextField
+              label="Who Am I"
+              name="whoami"
+              value={editData.whoami}
+              onChange={handleEditChange}
+              fullWidth
+              multiline
+              rows={3}
+              margin="normal"
+              variant="filled"
+              sx={{
+                input: { color: "#fff" },
+                label: { color: "#aaa" },
+                backgroundColor: "#2B2B3C",
+                borderRadius: 2,
+              }}
+            />
+          </>
+        ) : (
+          <Box sx={{ mt: 2 }}>
+            <Typography sx={{ color: "#aaa", whiteSpace: "pre-line" }}>
+              {isWhoamiHidden ? "••••••••••••••" : profileData.whoami || "No bio set"}
+            </Typography>
+            <Button
+              onClick={togglePrivacy}
+              startIcon={isWhoamiHidden ? <Visibility /> : <VisibilityOff />}
+              sx={{ mt: 1, color: "#00BFFF", textTransform: "none" }}
+            >
+              {isWhoamiHidden ? "Show Bio" : "Hide Bio"}
+            </Button>
           </Box>
         )}
-      </Box>
 
-      {/* User Info */}
-      <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
-        {profileData.display_name}
-      </Typography>
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 1, mb: 1 }}>
-        <Typography color="textSecondary">{profileData.username}</Typography>
-        <IconButton onClick={copyUsername} size="small">
-          <ContentCopy fontSize="small" color="primary" />
-        </IconButton>
-      </Box>
-      <TextField
-        label="Email"
-        value={profileData.email}
-        fullWidth
-        margin="normal"
-        InputProps={{ readOnly: true }}
-        variant="outlined"
-        sx={{ maxWidth: 400, mx: "auto" }}
-      />
-      {isEditing ? (
-        <>
-          <TextField
-            label="Display Name"
-            name="display_name"
-            value={editData.display_name}
-            onChange={handleEditChange}
-            fullWidth
-            margin="normal"
-            variant="outlined"
-            sx={{ maxWidth: 400, mx: "auto" }}
-          />
-          <TextField
-            label="Profile Picture URL"
-            name="profilePic"
-            value={editData.profilePic}
-            onChange={handleEditChange}
-            fullWidth
-            margin="normal"
-            variant="outlined"
-            sx={{ maxWidth: 400, mx: "auto" }}
-          />
-          <TextField
-            label="Who Am I"
-            name="whoami"
-            value={editData.whoami}
-            onChange={handleEditChange}
-            fullWidth
-            margin="normal"
-            multiline
-            rows={2}
-            variant="outlined"
-            sx={{ maxWidth: 400, mx: "auto" }}
-          />
-        </>
-      ) : (
-        <Box sx={{ mt: 2 }}>
-          <Typography
-            color="textSecondary"
-            sx={{ display: isWhoamiHidden ? "none" : "block" }}
-          >
-            {profileData.whoami || "No bio set"}
-          </Typography>
-          <Button
-            onClick={togglePrivacy}
-            startIcon={isWhoamiHidden ? <Visibility /> : <VisibilityOff />}
-            sx={{ mt: 1 }}
-          >
-            {isWhoamiHidden ? "Show Bio" : "Hide Bio"}
-          </Button>
+        {/* Action Buttons */}
+        <Box sx={{ mt: 3, display: "flex", justifyContent: "center", gap: 2 }}>
+          {isEditing ? (
+            <>
+              <Button
+                variant="contained"
+                onClick={saveProfileChanges}
+                disabled={loading}
+                sx={{
+                  background: "#00FFD1",
+                  color: "#000",
+                  fontWeight: 600,
+                  "&:hover": { background: "#00ddb7" },
+                }}
+              >
+                {loading ? "Saving..." : "Save"}
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditData({ ...profileData });
+                }}
+                sx={{
+                  borderColor: "#555",
+                  color: "#aaa",
+                  "&:hover": {
+                    borderColor: "#777",
+                    backgroundColor: "rgba(255,255,255,0.05)",
+                  },
+                }}
+              >
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outlined"
+              onClick={() => setIsEditing(true)}
+              sx={{
+                borderColor: "#00FFD1",
+                color: "#00FFD1",
+                fontWeight: 500,
+                "&:hover": {
+                  borderColor: "#00ddb7",
+                  backgroundColor: "rgba(0, 255, 209, 0.1)",
+                },
+              }}
+            >
+              Edit Profile
+            </Button>
+          )}
         </Box>
-      )}
-
-      {/* Edit/Save Button */}
-      <Box sx={{ mt: 2 }}>
-        {isEditing ? (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={saveProfileChanges}
-            disabled={loading}
-            sx={{ mr: 1 }}
-          >
-            {loading ? "Saving..." : "Save"}
-          </Button>
-        ) : (
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={() => setIsEditing(true)}
-            disabled={loading}
-          >
-            Edit Profile
-          </Button>
-        )}
-        {isEditing && (
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={() => {
-              setIsEditing(false);
-              setEditData({ ...profileData });
-            }}
-            sx={{ ml: 1 }}
-          >
-            Cancel
-          </Button>
-        )}
       </Box>
     </Box>
   );

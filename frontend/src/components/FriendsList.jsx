@@ -219,19 +219,31 @@ const FriendsList = ({ user, setSelectedFriend }) => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        bgcolor: "white",
+        bgcolor: "rgba(30,30,47,0.85)",
+        backdropFilter: "blur(12px)",
         borderRadius: 2,
-        boxShadow: 1,
+        boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+        border: "1px solid rgba(255,255,255,0.1)",
         height: "100%",
         overflow: "hidden",
+        color: "#fff",
       }}
     >
-      <Typography variant="h6" sx={{ p: 2, textAlign: "center", borderBottom: "1px solid #f0f0f0" }}>
+      <Typography 
+        variant="h6" 
+        sx={{ 
+          p: 2, 
+          textAlign: "center", 
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          color: "#fff",
+          fontWeight: 500
+        }}
+      >
         Friends
       </Typography>
 
       {/* Search box */}
-      <Box sx={{ px: 2, py: 1, borderBottom: "1px solid #f0f0f0" }}>
+      <Box sx={{ px: 2, py: 1, borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
         <TextField
           fullWidth
           placeholder="Search friends..."
@@ -242,20 +254,40 @@ const FriendsList = ({ user, setSelectedFriend }) => {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search fontSize="small" color="action" />
+                <Search fontSize="small" sx={{ color: "#aaa" }} />
               </InputAdornment>
             ),
             endAdornment: searchQuery ? (
               <InputAdornment position="end">
-                <IconButton size="small" onClick={clearSearch}>
+                <IconButton size="small" onClick={clearSearch} sx={{ color: "#aaa" }}>
                   <Clear fontSize="small" />
                 </IconButton>
               </InputAdornment>
             ) : null,
+            sx: {
+              color: "#fff",
+              "&::placeholder": {
+                color: "#aaa",
+                opacity: 1,
+              },
+            }
           }}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
+              backgroundColor: "#2B2B3C",
+              "& fieldset": {
+                borderColor: "rgba(255,255,255,0.1)",
+              },
+              "&:hover fieldset": {
+                borderColor: "rgba(255,255,255,0.2)",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#00FFD1",
+              },
+            },
+            "& .MuiInputBase-input": {
+              color: "#fff",
             },
           }}
         />
@@ -265,7 +297,7 @@ const FriendsList = ({ user, setSelectedFriend }) => {
       <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
         {loading && (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress />
+            <CircularProgress sx={{ color: "#00FFD1" }} />
           </Box>
         )}
 
@@ -277,9 +309,13 @@ const FriendsList = ({ user, setSelectedFriend }) => {
                   onClick={() => handleFriendClick(friend)}
                   sx={{
                     cursor: "pointer",
-                    bgcolor: selectedFriendId === friend.user_id ? "primary.light" : "transparent",
-                    color: selectedFriendId === friend.user_id ? "primary.contrastText" : "inherit",
-                    "&:hover": { bgcolor: selectedFriendId === friend.user_id ? "primary.main" : "grey.100" },
+                    bgcolor: selectedFriendId === friend.user_id ? "rgba(0, 255, 209, 0.1)" : "transparent",
+                    color: "#fff",
+                    "&:hover": { 
+                      bgcolor: selectedFriendId === friend.user_id 
+                        ? "rgba(0, 255, 209, 0.2)" 
+                        : "rgba(255,255,255,0.05)" 
+                    },
                     py: 1.5,
                   }}
                 >
@@ -295,7 +331,12 @@ const FriendsList = ({ user, setSelectedFriend }) => {
                         sx={{ 
                           width: 45, 
                           height: 45,
-                          border: selectedFriendId === friend.user_id ? "2px solid white" : "none"
+                          border: selectedFriendId === friend.user_id 
+                            ? "2px solid #00FFD1" 
+                            : "2px solid rgba(255,255,255,0.2)",
+                          boxShadow: selectedFriendId === friend.user_id
+                            ? "0 0 10px rgba(0,255,209,0.3)"
+                            : "none"
                         }}
                       >
                         {friend.display_name?.charAt(0) || "U"}
@@ -313,15 +354,20 @@ const FriendsList = ({ user, setSelectedFriend }) => {
                     }
                     primaryTypographyProps={{
                       fontWeight: friend.unread_count ? 'bold' : 'normal',
+                      color: "#fff",
                     }}
                     secondaryTypographyProps={{
-                      color: selectedFriendId === friend.user_id ? 'rgba(255, 255, 255, 0.7)' : 'text.secondary',
+                      color: selectedFriendId === friend.user_id ? '#00FFD1' : 'rgba(255, 255, 255, 0.7)',
                       fontWeight: friend.unread_count ? 'medium' : 'normal',
                     }}
                   />
                 </ListItem>
                 {index < filteredFriends.length - 1 && (
-                  <Divider variant="inset" component="li" />
+                  <Divider 
+                    variant="inset" 
+                    component="li" 
+                    sx={{ borderColor: "rgba(255,255,255,0.05)" }} 
+                  />
                 )}
               </Box>
             ))}
@@ -329,11 +375,19 @@ const FriendsList = ({ user, setSelectedFriend }) => {
         ) : (
           !loading && (
             <Box sx={{ p: 4, textAlign: "center" }}>
-              <Typography color="textSecondary">
+              <Typography color="rgba(255, 255, 255, 0.7)">
                 {searchQuery ? "No matching friends found" : (error || "No friends found")}
               </Typography>
               {searchQuery && (
-                <Typography variant="body2" color="primary" sx={{ mt: 1, cursor: "pointer" }} onClick={clearSearch}>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    mt: 1, 
+                    cursor: "pointer",
+                    color: "#00FFD1"
+                  }} 
+                  onClick={clearSearch}
+                >
                   Clear search
                 </Typography>
               )}
@@ -348,7 +402,19 @@ const FriendsList = ({ user, setSelectedFriend }) => {
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert onClose={handleSnackbarClose} severity="error" sx={{ width: "100%" }}>
+        <Alert 
+          onClose={handleSnackbarClose} 
+          severity="error" 
+          sx={{ 
+            width: "100%",
+            bgcolor: "#2B2B3C",
+            color: "#FF5252",
+            border: "1px solid #FF5252",
+            "& .MuiAlert-icon": {
+              color: "#FF5252"
+            }
+          }}
+        >
           {error}
         </Alert>
       </Snackbar>
