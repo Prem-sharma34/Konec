@@ -1,191 +1,76 @@
-import { useState, useEffect, useRef } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  IconButton,
-  Paper,
-  Avatar,
-  CircularProgress,
-  Button,
-} from "@mui/material";
-import { Send } from "@mui/icons-material";
-import { ref, onChildAdded, push, off, update } from "firebase/database";
+import { useEffect, useState } from "react";
+import { ref, set, onValue, remove } from "firebase/database";
+import { getAuth } from "firebase/auth";
 import { database } from "../utils/firebaseConfig";
-import MiniProfileModal from "./MiniProfileModal";
-import axiosInstance from "../utils/axiosInstance";
+import axios from "../utils/axiosInstance";
+import ChatBox from "./ChatBox";
 
-const RandomChatBox = ({ user, sessionId, otherUserId, onEnd }) => {
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [otherUser, setOtherUser] = useState(null);
+const RandomChatBox = ({ user, onExit }) => {
+  const [selectedFriend, setSelectedFriend] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showProfile, setShowProfile] = useState(false);
 
-  const messagesEndRef = useRef(null);
-  const messagesRef = ref(database, `random_sessions/${sessionId}/messages`);
-
-  // Fetch other user's profile
   useEffect(() => {
-    const fetchOtherUser = async () => {
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+
+    if (!currentUser || currentUser.uid !== user.id) {
+      console.error("User not authenticated or ID mismatch");
+      onExit();
+      return;
+    }
+
+    const queueRef = ref(database, "random_queue");
+    const userRef = ref(database, `random_queue/${user.id}`);
+
+    const enterQueue = async () => {
       try {
-        const res = await axiosInstance.get(`/random_chat/profile/public/${otherUserId}`);
-        setOtherUser(res.data);
+        await set(userRef, { timestamp: Date.now() });
+
+        onValue(queueRef, async (snapshot) => {
+          const users = snapshot.val();
+          if (!users) return;
+
+          const userIds = Object.keys(users);
+          const otherUserId = userIds.find((uid) => uid !== user.id);
+
+          if (otherUserId) {
+            await remove(ref(database, `random_queue/${user.id}`));
+            await remove(ref(database, `random_queue/${otherUserId}`));
+
+            await axios.post("/chat/get_or_create_chat", {
+              user_id_1: user.id,
+              user_id_2: otherUserId,
+            });
+
+            setSelectedFriend({
+              user_id: otherUserId,
+              display_name: "Random Stranger",
+              profile_pic: "/avatar.png",
+            });
+            setLoading(false);
+          }
+        });
       } catch (err) {
-        console.error("Failed to load user profile", err);
+        console.error("Error in queue logic:", err);
+        onExit();
       }
     };
-    fetchOtherUser();
-  }, [otherUserId]);
 
-  // Listen for new messages
-  useEffect(() => {
-    const unsubscribe = onChildAdded(messagesRef, (snapshot) => {
-      const msg = snapshot.val();
-      setMessages((prev) => [...prev, msg]);
-    });
+    enterQueue();
 
-    setLoading(false);
-    return () => off(messagesRef);
-  }, [sessionId]);
+    return () => {
+      remove(userRef);
+    };
+  }, []);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const handleSend = async () => {
-    if (!newMessage.trim()) return;
-    try {
-      await push(messagesRef, {
-        sender: user.id,
-        text: newMessage.trim(),
-        timestamp: Date.now(),
-      });
-      setNewMessage("");
-    } catch (err) {
-      console.error("Message send error", err);
-    }
-  };
-
-  const handleEndChat = async () => {
-    try {
-      const sessionRef = ref(database, `random_sessions/${sessionId}`);
-      await update(sessionRef, { ended: true });
-
-      await axiosInstance.post("/log", {
-        other_user_id: otherUserId,
-        other_username: otherUser?.username,
-        other_display_name: otherUser?.display_name,
-        other_profile_pic: otherUser?.profilePic,
-        ended_at: new Date().toISOString(),
-      });
-
-      if (onEnd) onEnd();
-    } catch (err) {
-      console.error("Error ending chat", err);
-    }
-  };
-
-  if (loading || !otherUser) {
-    return <CircularProgress sx={{ mt: 4 }} />;
+  if (loading || !selectedFriend) {
+    return <div style={{ textAlign: "center", paddingTop: 100 }}>Matching you with someone...</div>;
   }
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "calc(100vh - 120px)",
-        maxWidth: 800,
-        mx: "auto",
-        bgcolor: "white",
-        borderRadius: 2,
-        boxShadow: 2,
-        overflow: "hidden",
-      }}
-    >
-      {/* Header */}
-      <Box
-        sx={{
-          p: 2,
-          bgcolor: "primary.main",
-          color: "white",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Avatar
-            src={otherUser.profilePic}
-            sx={{ cursor: "pointer" }}
-            onClick={() => setShowProfile(true)}
-          >
-            {otherUser.display_name?.charAt(0) || "U"}
-          </Avatar>
-          <Typography variant="h6">{otherUser.display_name}</Typography>
-        </Box>
-        <Button variant="contained" color="error" onClick={handleEndChat}>
-          End Chat
-        </Button>
-      </Box>
-
-      {/* Messages */}
-      <Box
-        sx={{ flexGrow: 1, p: 2, overflowY: "auto", bgcolor: "#f5f5f5" }}
-      >
-        {messages.map((msg, i) => (
-          <Box
-            key={i}
-            sx={{
-              display: "flex",
-              justifyContent: msg.sender === user.id ? "flex-end" : "flex-start",
-              mb: 1,
-            }}
-          >
-            <Paper
-              sx={{
-                p: 1.5,
-                maxWidth: "70%",
-                borderRadius: 2,
-                bgcolor:
-                  msg.sender === user.id ? "primary.light" : "grey.100",
-              }}
-            >
-              <Typography>{msg.text}</Typography>
-            </Paper>
-          </Box>
-        ))}
-        <div ref={messagesEndRef} />
-      </Box>
-
-      {/* Input */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          p: 2,
-          borderTop: "1px solid #ddd",
-        }}
-      >
-        <TextField
-          fullWidth
-          placeholder="Type a message..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-        />
-        <IconButton onClick={handleSend} color="primary" disabled={!newMessage.trim()}>
-          <Send />
-        </IconButton>
-      </Box>
-
-      <MiniProfileModal
-        open={showProfile}
-        onClose={() => setShowProfile(false)}
-        userId={otherUserId}
-      />
-    </Box>
+    <div style={{ position: "relative" }}>
+      <ChatBox user={user} selectedFriend={selectedFriend} isRandomChat onExit={onExit} />
+    </div>
   );
 };
 
